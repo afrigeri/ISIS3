@@ -75,6 +75,7 @@ namespace Isis {
     FillPolygon(1);
   }
 
+
  /**
   *
   *
@@ -92,7 +93,7 @@ namespace Isis {
    CreateVectorPolygon(0);
  }
 
-
+ 
 
  /**
   * Vectorize multiband instruments where the bands have dependent geometry (i.e., the bands are
