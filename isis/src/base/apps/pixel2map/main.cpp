@@ -1,9 +1,5 @@
 #define GUIHELPERS
 
-// just for cout
-#include <iostream>
-using namespace std;
-
 #include "Isis.h"
  
 #include <QDebug>
@@ -498,7 +494,7 @@ void vectorizePixel(Isis::Buffer &in) {
       }
       // rasterize this ifov and clear vectors for next ifov
       // add Vectorize method
-	  cout << "Vector poly\n";
+	  std::cout << "Vector poly\n";
       g_processGroundPolygons.Vectorize(lat, lon, dns, outvect);
 	  
       lat.clear();
