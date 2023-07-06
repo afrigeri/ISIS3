@@ -330,7 +330,7 @@ namespace Isis {
       geos::geom::prep::PreparedPolygon *preparedPoly =
         new geos::geom::prep::PreparedPolygon(intersectPoly);
       //const geos::geom::Envelope *envelope = intersectPoly->getEnvelopeInternal();
-	  cout << "Creating a vector!\n";
+	  cout << "Creating a vector (ProcessPolygons)!\n";
 
       delete projectedInputPoly;
       delete intersectPoly;
