@@ -1,7 +1,11 @@
 #define GUIHELPERS
 
-#include "Isis.h"
+// just for cout
+#include <iostream>
+using namespace std;
 
+#include "Isis.h"
+ 
 #include <QDebug>
 #include <QList>
 #include <QPointF>
@@ -28,6 +32,7 @@ using namespace Isis;
 
 void PrintMap();
 void rasterizePixel(Isis::Buffer &in);
+void vectorizePixel(Isis::Buffer &in);
 
 map <QString, void *> GuiHelpers() {
   map <QString, void *> helper;
@@ -39,6 +44,9 @@ map <QString, void *> GuiHelpers() {
 ProcessGroundPolygons g_processGroundPolygons;
 Camera *g_incam;
 int g_numIFOVs = 0;
+int g_vectorOut = 0;  // to be set bool in future
+QString vectOut;
+QString outvect;
 
 void IsisMain() {
 
@@ -62,6 +70,12 @@ void IsisMain() {
     catch (IException &e) {
       throw IException(e);
     }
+  }
+
+  // Vector output 
+  if (ui.GetString("VECTOR") == "1") {
+    g_vectorOut = 1;
+	cout << g_vectorOut;
   }
 
   if (ui.GetString("FOVRANGE") == "INSTANTANEOUS") {
@@ -315,7 +329,26 @@ void IsisMain() {
     }
   }
 
-  g_processGroundPolygons.SetStatCubes("TO", pvl, bands);
+  // If vector, then no SetStatCubes
+  if (g_vectorOut == 0) {
+      g_processGroundPolygons.SetStatCubes("TO", pvl, bands);
+  } else {
+  	  //open the vector file
+	  // Get the output gml file name
+	  
+	  outvect = ui.GetFileName("VNAME");
+	  //if (ui.WasEntered("TO")) {
+	  //  outgml = ui.GetString("TO");
+	    //FileName out = ui.GetString("TO");
+	    //if(out.extension() == "") {
+	    //  outgml += ".gml";
+	    //}
+	  //}
+	  //else {
+	  //  FileName inputFile = ui.GetCubeName("FROM");
+	  //  outgml = inputFile.removeExtension().addExtension("gml").expanded();
+	  //}
+  }
 
   bool useCenter = true;
   if (ui.GetString("METHOD") == "CENTER") {
@@ -338,13 +371,19 @@ void IsisMain() {
     CubeAttributeInput atts0(list[f]);
     Cube *icube = processBrick.SetInputCube(list[f].toString(), atts0, 0);
     g_incam = icube->camera();
-
-    processBrick.StartProcess(rasterizePixel);
-    processBrick.EndProcess();
+    
+    if (g_vectorOut == 0) { 
+    	processBrick.StartProcess(rasterizePixel);
+		processBrick.EndProcess();
+		} else {
+		processBrick.StartProcess(vectorizePixel);	
+		}
+    
   }
   
+  if (g_vectorOut != 1 ) {
   // When there is only one input cube, we want to propagate IsisCube labels to output cubes
-  if (list.size() == 1) {
+  if (list.size() == 1 ) {
     // Note that polygons and original labels are not propagated
     g_processGroundPolygons.PropagateLabels(list[0].toString());
     // Tell Process which tables we want to propagate
@@ -353,7 +392,9 @@ void IsisMain() {
         << "SunPosition";
     g_processGroundPolygons.PropagateTables(list[0].toString(), tablesToPropagate);
   }
-  g_processGroundPolygons.EndProcess();
+  
+  g_processGroundPolygons.Finalize();
+  } // g_vectorOut != 1
 
   // WARNING: rasterizePixel() method alters the current state of the camera.
   // If any code is added after this point, you must call setImage to return
@@ -413,9 +454,58 @@ void rasterizePixel(Isis::Buffer &in) {
         lon.push_back(fovVertices[ifov][point].y());
       }
       // rasterize this ifov and clear vectors for next ifov
+      // add Vectorize method
       g_processGroundPolygons.Rasterize(lat, lon, dns);
       lat.clear();
       lon.clear();
     }
   }
 }
+
+/**
+  * This method uses the ProcessGroundPolygons object to vectorize each 
+  * pixel in the given buffer. 
+  *  
+  * @param in Input ProcessByBrick buffer. 
+  */
+void vectorizePixel(Isis::Buffer &in) {
+
+  std::vector<double>lat, lon;
+  std::vector<double>dns;
+
+  for (int i = 0; i < in.size(); i++) {
+    dns.push_back(in[i]);
+  }
+
+  int l = in.Line();
+  int s = in.Sample();
+
+  //  	DO: This needs to be done for each band for band dependant instruments
+  // Note: This can slow this down a lot
+
+  // Get the IFOVs in lat/lon space
+  PixelFOV fov;
+  QList< QList< QPointF > > fovVertices = fov.latLonVertices(*g_incam, l, s, g_numIFOVs);
+
+  // loop through each ifov list
+  for (int ifov = 0; ifov < fovVertices.size(); ifov++) {
+    // we need at least 3 vertices for a polygon
+    if (fovVertices[ifov].size() > 3) {
+      //  Get lat/lon for each vertex of the ifov
+      for (int point = 0; point < fovVertices[ifov].size(); point++) {
+        lat.push_back(fovVertices[ifov][point].x());
+        lon.push_back(fovVertices[ifov][point].y());
+      }
+      // rasterize this ifov and clear vectors for next ifov
+      // add Vectorize method
+	  cout << "Vector poly\n";
+      g_processGroundPolygons.Vectorize(lat, lon, dns, outvect);
+	  
+      lat.clear();
+      lon.clear();
+    }
+  }  
+}
+
+  
+

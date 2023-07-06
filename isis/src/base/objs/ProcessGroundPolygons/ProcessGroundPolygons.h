@@ -62,6 +62,7 @@ namespace Isis {
       void SetStatCubes(const QString &avgFileName, const QString
                          &countFileName, Isis::CubeAttributeOutput &atts,
                          Isis::Pvl &map, int bands);
+						 
 
       void AppendOutputCube(QString &cube, const QString &avgFileName,
                             const QString &countFileName = "");
@@ -73,6 +74,11 @@ namespace Isis {
       void Rasterize(std::vector<double> &lat,
                      std::vector<double> &lon,
                      int &band, double &value);
+
+	  void Vectorize(std::vector<double> &lat,
+			         std::vector<double> &lon,
+			         std::vector<double> &values,
+					 QString outFile );					 
 
       void EndProcess();
       void Finalize();

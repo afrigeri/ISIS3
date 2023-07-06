@@ -75,6 +75,46 @@ namespace Isis {
     FillPolygon(1);
   }
 
+ /**
+  *
+  *
+  * @param samples
+  * @param lines
+  * @param values
+  */
+ void ProcessPolygons::Vectorize(std::vector<double> &samples,
+                                 std::vector<double> &lines,
+                                 std::vector<double> &values) {
+
+   m_sampleVertices = samples;
+   m_lineVertices = lines;
+   m_dns = values;
+   CreateVectorPolygon(0);
+ }
+
+
+
+ /**
+  * Vectorize multiband instruments where the bands have dependent geometry (i.e., the bands are
+  * not geometrically registered).
+  *
+  * @param samples
+  * @param lines
+  * @param band
+  * @param value
+  */
+ void ProcessPolygons::Vectorize(std::vector<double> &samples,
+                                 std::vector<double> &lines,
+                                 int &band, double &value) {
+
+   m_sampleVertices = samples;
+   m_lineVertices = lines;
+   m_band = band;
+   m_dns.clear();
+   m_dns.push_back(value);
+
+   CreateVectorPolygon(1);
+ }
 
   /**
    * This method does the actuall reading and writing to the cube
@@ -237,6 +277,74 @@ namespace Isis {
 
   }
 
+  void ProcessPolygons::CreateVectorPolygon(int Flag) {
+
+    // Create a sample/line polygon for the input pixel vertices
+    geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
+    for (unsigned int i = 0; i < m_sampleVertices.size(); i++) {
+      pts->add(geos::geom::Coordinate(m_sampleVertices[i], m_lineVertices[i]));
+    }
+    pts->add(geos::geom::Coordinate(m_sampleVertices[0], m_lineVertices[0]));
+
+    try {
+      //  Create a polygon from the pixel vertices.  This polygon may have spikes or other
+      //  problems such as multiple polygons.  Despike, then make sure we have a single polygon.
+      //  Do not rasterize pixel if despiking fails or there are multiple polygons.
+      geos::geom::Polygon *spikedPoly = Isis::globalFactory->createPolygon(
+          globalFactory->createLinearRing(pts), NULL);
+
+      const geos::geom::Polygon *projectedInputPoly;
+
+      if (spikedPoly->isValid()) {
+        projectedInputPoly = spikedPoly;
+      }
+      else {
+        geos::geom::MultiPolygon *despikedPoly;
+        try {
+          despikedPoly = PolygonTools::Despike(spikedPoly);
+        }
+        catch (IException &e) {
+          delete spikedPoly;
+          return;
+        }
+
+        try {
+          despikedPoly = PolygonTools::Despike(spikedPoly);
+        }
+        catch (IException &e) {
+          delete spikedPoly;
+          return;
+        }
+
+        if (despikedPoly->getNumGeometries() > 1) return;
+        projectedInputPoly =
+            dynamic_cast<const geos::geom::Polygon *>(despikedPoly->getGeometryN(0));
+      }
+
+      /* If there is not an intersecting polygon, there is no reason to go on.*/
+      if (!projectedInputPoly->intersects(m_imagePoly)) return;
+
+      geos::geom::MultiPolygon *intersectPoly = PolygonTools::MakeMultiPolygon(
+          m_imagePoly->intersection(projectedInputPoly).release());
+      geos::geom::prep::PreparedPolygon *preparedPoly =
+        new geos::geom::prep::PreparedPolygon(intersectPoly);
+      //const geos::geom::Envelope *envelope = intersectPoly->getEnvelopeInternal();
+	  cout << "Creating a vector!\n";
+
+      delete projectedInputPoly;
+      delete intersectPoly;
+      delete preparedPoly;
+
+    } /*end try*/
+
+    catch(geos::util::IllegalArgumentException *ill) {
+      QString msg = "ERROR! geos exception 1 [";
+      msg += (QString)ill->what() + "]";
+      delete ill;
+      throw IException(IException::Programmer, msg, _FILEINFO_);
+    }/*end catch*/
+
+  }
 
   /**
    *
