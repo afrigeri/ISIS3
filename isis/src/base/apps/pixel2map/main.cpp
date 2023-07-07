@@ -372,8 +372,33 @@ void IsisMain() {
     	processBrick.StartProcess(rasterizePixel);
 		processBrick.EndProcess();
 		} else {
+			
 		processBrick.StartProcess(vectorizePixel);	
-		}
+		
+	    ofstream fout_vrt;
+  
+	    QString outFileNameVRT = FileName( outvect.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
+        QString outFileName_noext = FileName( outvect.toLatin1().data() ).removeExtension().expanded();
+	
+	    fout_vrt.open( outFileNameVRT.toLatin1().data() , std::ios_base::app );
+	    // Get the output xsd file name
+  
+	    //id;name;amount;city;geom
+  
+  
+	    fout_vrt << "<OGRVRTDataSource>" << endl;
+	    fout_vrt << "    <OGRVRTLayer name=\""<< outFileName_noext.toLatin1().data() << "\"> " << endl;
+	    fout_vrt << "           <SrcDataSource>" << outvect.toLatin1().data() << "</SrcDataSource>" << endl;
+	    fout_vrt << "           <GeometryType>wkbMultiPolygon</GeometryType>" << endl;
+	    fout_vrt << "           <LayerSRS>IAU:49900</LayerSRS>" << endl;
+	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" />" << endl;
+	    fout_vrt << "       </OGRVRTLayer>" << endl;
+	    fout_vrt << "   </OGRVRTDataSource>" << endl;
+  
+	    fout_vrt.close();
+		
+	
+	}
     
   }
   
@@ -468,6 +493,8 @@ void vectorizePixel(Isis::Buffer &in) {
 
   std::vector<double>lat, lon;
   std::vector<double>dns;
+
+
 
   for (int i = 0; i < in.size(); i++) {
     dns.push_back(in[i]);

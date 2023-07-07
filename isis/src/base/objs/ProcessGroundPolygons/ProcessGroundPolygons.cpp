@@ -123,11 +123,19 @@ namespace Isis {
 									   QString outFile ) {
 
    cout << "VECTORIZING!\n";
-   ofstream fout;
-   fout.open( outFile.toLatin1().data(), std::ios_base::app );
+   ofstream fout_csv;
+   
+   QString outFileNameVRT = FileName( outFile.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
+   
+   fout_csv.open( outFile.toLatin1().data() , std::ios_base::app );   
+
+   fout_csv << "S" << "," << "L" << "," << "geom" << endl;
+   
    
    geos::io::WKTWriter *wkt = new geos::io::WKTWriter();
-   //geos::io::GEOSGeoJSONWriter *json = new geos::io::GEOJSONWriter()
+   //id;name;amount;city;geom
+
+   
    // Decide if we need to split the poly on the 360 boundry
    // Yes, we can do this better. The lat and lon vectors should be passed in as polygons, but
    // for now this is reusing older code.
@@ -161,7 +169,7 @@ namespace Isis {
        // See leading comment
      }
 
-     cout << wkt->write(crossingPoly);
+	 
      delete crossingPoly;
 
      if (splitPoly != NULL) {
@@ -182,16 +190,18 @@ namespace Isis {
            tlat.push_back(llcoords->getAt(cord).y);
          }
 
+         
          Convert(tlat, tlon);
          //ProcessPolygons::Rasterize(p_samples, p_lines, values);
        }
+	   fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(splitPoly)  << "\"" << endl;
        delete splitPoly;
      }
    }
    else { // if does not crosses
      cout << "does not cross!\n";
      //Convert(lat, lon);
-	 cout << "A!\n";
+	 //cout << "A!\n";
      // Make a polygon from the lat/lon vectors and split it on 360
      geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
      for (unsigned int i = 0; i < lat.size(); i++) {
@@ -202,7 +212,7 @@ namespace Isis {
      geos::geom::Polygon *crossingPoly = Isis::globalFactory->createPolygon(
          globalFactory->createLinearRing(pts), NULL);
 	 cout << "B!\n";
-	 fout << wkt->write(crossingPoly) << endl;
+	 fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(crossingPoly)  << "\"" << endl;
      //ProcessPolygons::Rasterize(p_samples, p_lines, values);
    }
    
@@ -213,7 +223,7 @@ namespace Isis {
    //ofstream fout;
    //fout.open(outgml.toLatin1().data());
    //fout << polyString << endl;
-   fout.close();
+   fout_csv.close();
  }
 
 
