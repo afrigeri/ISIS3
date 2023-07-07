@@ -48,6 +48,7 @@ QString vectOut;
 QString outvect;
 
 ofstream fout_csv;
+QString ogc_SRS;
 
 
 
@@ -113,8 +114,8 @@ void IsisMain() {
     g_incam = icube.camera();
 	
 	Spice spi(icube);
-	QString ogc_SRS = "IAU:" + Isis::toString(spi.target()->naifBodyCode())  + "00";
-	cout << ogc_SRS << endl;
+	ogc_SRS = "IAU:" + Isis::toString(spi.target()->naifBodyCode())  + "00";
+	//cout << ogc_SRS << endl;
 
     // Make sure it is not the sky
     if (g_incam->target()->isSky()) {
@@ -396,7 +397,7 @@ void IsisMain() {
 	    fout_vrt << "    <OGRVRTLayer name=\""<< outFileName_noext.toLatin1().data() << "\"> " << endl;
 	    fout_vrt << "           <SrcDataSource>" << outvect.toLatin1().data() << "</SrcDataSource>" << endl;
 	    fout_vrt << "           <GeometryType>wkbMultiPolygon</GeometryType>" << endl;
-	    fout_vrt << "           <LayerSRS>IAU:49900</LayerSRS>" << endl;
+	    fout_vrt << "           <LayerSRS>"<<  ogc_SRS.toLatin1().data() << "</LayerSRS>" << endl;
 	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" />" << endl;
 	    fout_vrt << "       </OGRVRTLayer>" << endl;
 	    fout_vrt << "   </OGRVRTDataSource>" << endl;
@@ -546,13 +547,12 @@ void vectorizePixel(Isis::Buffer &in) {
       // rasterize this ifov and clear vectors for next ifov
       // add Vectorize method
 	  GndPixel = g_processGroundPolygons.Vectorize(lat, lon, dns);
-	  cout << GndPixel << endl;
+	  //cout << GndPixel << endl;
 	  fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(GndPixel)  << "\"" << endl;
 	  	  
       lat.clear();
       lon.clear();
-    }
-  //fout_csv.close();	
+    }	
   }  
 }
 
