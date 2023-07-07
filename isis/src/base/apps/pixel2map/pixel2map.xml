@@ -426,8 +426,7 @@
       <parameter name="TO">
         <type>cube</type>
         <fileMode>output</fileMode>
-          <pixelType>real</pixelType>
-		  <default><item>false</item></default>
+		<default><item>false</item></default>
         <brief>
           Newly mapped cube
         </brief>
@@ -437,24 +436,25 @@
           filename with '-count-' appended.  The DN values in this output cube indicate how many input pixels
           were included in the average calculation to create the output pixel.
         </description>
-		<exclusions><item>VNAME</item></exclusions>
         <filter>
           *.cub
         </filter>
       </parameter>
-	  	  
-      <parameter name="VNAME">
-        <type>filename</type>
-		<fileMode>output</fileMode>
-		<default><item>false</item></default>
-        <brief>
-          Geospatial Vector out
-        </brief>
-        <description>
-			Output VECTOR FILE
-        </description>
-		<exclusions><item>TO</item></exclusions>
-      </parameter>
+	  
+	  <parameter name="TOVECT">
+	    <type>filename</type>
+	        <fileMode>output</fileMode>
+	       <default><item>false</item></default>
+	          <brief>
+	            Geospatial VRT Vector File
+	          </brief>
+	          <description>
+	              The output file will be a VRT File and a comma-delimited file.  This file format
+	              can easily be imported into <i>Open Gis Consortium (OGC)</i> compatible Geospatial tools.
+	          </description>
+	  </parameter>
+	  
+	  
 	  
     </group>
 

@@ -122,7 +122,6 @@ namespace Isis {
                                        std::vector<double> &values,
 									   QString outFile ) {
 
-   cout << "VECTORIZING!\n";
    ofstream fout_csv;
    
    QString outFileNameVRT = FileName( outFile.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
@@ -147,7 +146,7 @@ namespace Isis {
      }
    }
 
-   cout << "check crossing!\n";
+
    if (crosses) {
      // Make a polygon from the lat/lon vectors and split it on 360
      geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
@@ -199,7 +198,7 @@ namespace Isis {
      }
    }
    else { // if does not crosses
-     cout << "does not cross!\n";
+
      //Convert(lat, lon);
 	 //cout << "A!\n";
      // Make a polygon from the lat/lon vectors and split it on 360
@@ -211,7 +210,7 @@ namespace Isis {
 
      geos::geom::Polygon *crossingPoly = Isis::globalFactory->createPolygon(
          globalFactory->createLinearRing(pts), NULL);
-	 cout << "B!\n";
+
 	 fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(crossingPoly)  << "\"" << endl;
      //ProcessPolygons::Rasterize(p_samples, p_lines, values);
    }

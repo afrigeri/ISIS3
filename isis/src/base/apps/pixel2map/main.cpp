@@ -43,6 +43,8 @@ int g_numIFOVs = 0;
 int g_vectorOut = 0;  // to be set bool in future
 QString vectOut;
 QString outvect;
+//m_target = new Target;
+
 
 void IsisMain() {
 
@@ -69,9 +71,9 @@ void IsisMain() {
   }
 
   // Vector output 
-  if (ui.WasEntered("VNAME")) {
-    g_vectorOut = 1;
-  }
+  //if (ui.WasEntered("VNAME")) {
+  //	    g_vectorOut = 1;
+  //}
 
   if (ui.GetString("FOVRANGE") == "INSTANTANEOUS") {
     g_numIFOVs = 1;
@@ -102,6 +104,10 @@ void IsisMain() {
     icube.open( list[i].toString() );
     bands = icube.bandCount();
     g_incam = icube.camera();
+	
+	Spice spi(icube);
+	QString ogc_SRS = "IAU:" + Isis::toString(spi.target()->naifBodyCode())  + "00";
+	cout << ogc_SRS << endl;
 
     // Make sure it is not the sky
     if (g_incam->target()->isSky()) {
@@ -325,25 +331,22 @@ void IsisMain() {
   }
 
   // If vector, then no SetStatCubes
-  if (g_vectorOut == 0) {
+  //if (g_vectorOut == 0) {
+  //    g_processGroundPolygons.SetStatCubes("TO", pvl, bands);
+  //} else {
+  //	  outvect = ui.GetFileName("VNAME");
+  //}
+
+  if ( ui.WasEntered("TO") ) {
       g_processGroundPolygons.SetStatCubes("TO", pvl, bands);
-  } else {
-  	  //open the vector file
-	  // Get the output gml file name
-	  
-	  outvect = ui.GetFileName("VNAME");
-	  //if (ui.WasEntered("TO")) {
-	  //  outgml = ui.GetString("TO");
-	    //FileName out = ui.GetString("TO");
-	    //if(out.extension() == "") {
-	    //  outgml += ".gml";
-	    //}
-	  //}
-	  //else {
-	  //  FileName inputFile = ui.GetCubeName("FROM");
-	  //  outgml = inputFile.removeExtension().addExtension("gml").expanded();
-	  //}
   }
+  
+  if ( ui.WasEntered("TOVECT") ) {
+      g_vectorOut = 1;
+	  outvect = ui.GetFileName("TOVECT");
+	  
+  }
+
 
   bool useCenter = true;
   if (ui.GetString("METHOD") == "CENTER") {
