@@ -21,6 +21,9 @@
 #include "PvlGroup.h"
 #include "Target.h"
 
+#include "geos/geom/Geometry.h"
+#include "geos/io/WKTWriter.h"
+
 #include "pixel2map.h"
 
 using namespace std;
@@ -43,7 +46,9 @@ int g_numIFOVs = 0;
 int g_vectorOut = 0;  // to be set bool in future
 QString vectOut;
 QString outvect;
-//m_target = new Target;
+
+ofstream fout_csv;
+
 
 
 void IsisMain() {
@@ -89,6 +94,8 @@ void IsisMain() {
   double maxlon = 0;
   PvlGroup camGrp;
   QString lastBandString;
+  
+
 
   // Get the combined lat/lon range for all input cubes
   int bands = 1;
@@ -375,7 +382,7 @@ void IsisMain() {
 		processBrick.EndProcess();
 		} else {
 			
-		processBrick.StartProcess(vectorizePixel);	
+		
 		
 	    ofstream fout_vrt;
   
@@ -395,6 +402,19 @@ void IsisMain() {
 	    fout_vrt << "   </OGRVRTDataSource>" << endl;
   
 	    fout_vrt.close();
+		
+
+   
+	    // std::ios_base::app -> to append
+	    fout_csv.open( outvect.toLatin1().data()  );  
+	    fout_csv << "S" << "," << "L" << "," << "geom" << endl;
+		fout_csv.close();
+		// open in append mode
+		fout_csv.open( outvect.toLatin1().data(), std::ios_base::app  );
+		
+		processBrick.StartProcess(vectorizePixel);	
+		processBrick.EndProcess();
+		fout_csv.close();
 		
 	
 	}
@@ -492,7 +512,11 @@ void vectorizePixel(Isis::Buffer &in) {
 
   std::vector<double>lat, lon;
   std::vector<double>dns;
+  geos::geom::Geometry* GndPixel;
 
+  
+  // Setup the WKT writer
+  geos::io::WKTWriter *wkt = new geos::io::WKTWriter();
 
 
   for (int i = 0; i < in.size(); i++) {
@@ -502,12 +526,13 @@ void vectorizePixel(Isis::Buffer &in) {
   int l = in.Line();
   int s = in.Sample();
 
-  //  	DO: This needs to be done for each band for band dependant instruments
+  // DO: This needs to be done for each band for band dependent instruments
   // Note: This can slow this down a lot
 
   // Get the IFOVs in lat/lon space
   PixelFOV fov;
   QList< QList< QPointF > > fovVertices = fov.latLonVertices(*g_incam, l, s, g_numIFOVs);
+  
 
   // loop through each ifov list
   for (int ifov = 0; ifov < fovVertices.size(); ifov++) {
@@ -520,11 +545,14 @@ void vectorizePixel(Isis::Buffer &in) {
       }
       // rasterize this ifov and clear vectors for next ifov
       // add Vectorize method
-      g_processGroundPolygons.Vectorize(lat, lon, dns, outvect);
-	  
+	  GndPixel = g_processGroundPolygons.Vectorize(lat, lon, dns);
+	  cout << GndPixel << endl;
+	  fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(GndPixel)  << "\"" << endl;
+	  	  
       lat.clear();
       lon.clear();
     }
+  //fout_csv.close();	
   }  
 }
 

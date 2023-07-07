@@ -106,125 +106,108 @@ namespace Isis {
   }
 
 
- /**
-  * This method gets called from the application with the lat/lon
-  * vertices of a polygon along with a vector of values.
-  * The location of the values with in the verctor indicate which
-  * band that value gets written to
-  *
-  * @param lat
-  * @param lon
-  * @param values
-  * @param outfile
-  */
- void ProcessGroundPolygons::Vectorize(std::vector<double> &lat,
-                                       std::vector<double> &lon,
-                                       std::vector<double> &values,
-									   QString outFile ) {
-
-   ofstream fout_csv;
-   
-   QString outFileNameVRT = FileName( outFile.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
-   
-   fout_csv.open( outFile.toLatin1().data() , std::ios_base::app );   
-
-   fout_csv << "S" << "," << "L" << "," << "geom" << endl;
-   
-   
-   geos::io::WKTWriter *wkt = new geos::io::WKTWriter();
-   //id;name;amount;city;geom
-
-   
-   // Decide if we need to split the poly on the 360 boundry
-   // Yes, we can do this better. The lat and lon vectors should be passed in as polygons, but
-   // for now this is reusing older code.
-   bool crosses = false;
-   for (unsigned int i = 0; i < lon.size() - 1; i++) {
-     if (fabs(lon[i] - lon[i+1]) > 180.0) {
-       crosses = true;
-       break;
-     }
-   }
 
 
-   if (crosses) {
-     // Make a polygon from the lat/lon vectors and split it on 360
-     geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
-     for (unsigned int i = 0; i < lat.size(); i++) {
-       pts->add(geos::geom::Coordinate(lon[i], lat[i]));
-     }
-     pts->add(geos::geom::Coordinate(lon[0], lat[0]));
-
-     geos::geom::Polygon *crossingPoly = Isis::globalFactory->createPolygon(
-         globalFactory->createLinearRing(pts), NULL);
-
-     geos::geom::MultiPolygon *splitPoly = NULL;
-     try {
-       splitPoly = PolygonTools::SplitPolygonOn360(crossingPoly);
-     }
-     // Ignore any pixel footprints that could not be split. This should only be pixels
-     // that contain the pole.
-     catch (IException &) {
-       // See leading comment
-     }
-
-	 
-     delete crossingPoly;
-
-     if (splitPoly != NULL) {
-       // Process the polygons in the split multipolygon as if we were still using the lat/lon vectors
-       for (unsigned int g = 0; g < splitPoly->getNumGeometries(); ++g) {
-         const geos::geom::Polygon *poly =
-             dynamic_cast<const geos::geom::Polygon *>(splitPoly->getGeometryN(g));
-
-         geos::geom::CoordinateSequence *llcoords =
-             poly->getExteriorRing()->getCoordinates().release();
-
-         // Move each coordinate in the exterior ring of this lat/lon polygon to vectors
-         // Ignore any holes in the polygon
-         std::vector<double> tlat;
-         std::vector<double> tlon;
-         for (unsigned int cord = 0; cord < llcoords->getSize() - 1; ++cord) {
-           tlon.push_back(llcoords->getAt(cord).x);
-           tlat.push_back(llcoords->getAt(cord).y);
-         }
-
-         
-         Convert(tlat, tlon);
-         //ProcessPolygons::Rasterize(p_samples, p_lines, values);
-       }
-	   fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(splitPoly)  << "\"" << endl;
-       delete splitPoly;
-     }
-   }
-   else { // if does not crosses
-
-     //Convert(lat, lon);
-	 //cout << "A!\n";
-     // Make a polygon from the lat/lon vectors and split it on 360
-     geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
-     for (unsigned int i = 0; i < lat.size(); i++) {
-       pts->add(geos::geom::Coordinate(lon[i], lat[i]));
-     }
-     pts->add(geos::geom::Coordinate(lon[0], lat[0]));
-
-     geos::geom::Polygon *crossingPoly = Isis::globalFactory->createPolygon(
-         globalFactory->createLinearRing(pts), NULL);
-
-	 fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(crossingPoly)  << "\"" << endl;
-     //ProcessPolygons::Rasterize(p_samples, p_lines, values);
-   }
-   
+/**
+ * This method gets called from the application with the lat/lon
+ * vertices of a polygon along with a vector of values.
+ * The location of the values with in the verctor indicate which
+ * band that value gets written to
+ *
+ * @param lat
+ * @param lon
+ * @param values
+ * @param outfile
+ */
+geos::geom::Geometry* ProcessGroundPolygons::Vectorize(std::vector<double> &lat,
+                                         std::vector<double> &lon,
+                                         std::vector<double> &values) 
+										 {
 
 
-   // Write the gml file.
-   //polyString = PolygonTools::ToGML( poly , fid, FileName(outxsd).name());
-   //ofstream fout;
-   //fout.open(outgml.toLatin1().data());
-   //fout << polyString << endl;
-   fout_csv.close();
- }
+  // setup the WKT writer						
+  geos::io::WKTWriter *wkt = new geos::io::WKTWriter();
 
+  
+  // Decide if we need to split the poly on the 360 boundry
+  // Yes, we can do this better. The lat and lon vectors should be passed in as polygons, but
+  // for now this is reusing older code.
+  bool crosses = false;
+  for (unsigned int i = 0; i < lon.size() - 1; i++) {
+    if (fabs(lon[i] - lon[i+1]) > 180.0) {
+      crosses = true;
+      break;
+    }
+  }
+
+
+  if (crosses) {
+    // Make a polygon from the lat/lon vectors and split it on 360
+    geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
+    for (unsigned int i = 0; i < lat.size(); i++) {
+      pts->add(geos::geom::Coordinate(lon[i], lat[i]));
+    }
+    pts->add(geos::geom::Coordinate(lon[0], lat[0]));
+
+    geos::geom::Polygon *crossingPoly = Isis::globalFactory->createPolygon(
+        globalFactory->createLinearRing(pts), NULL);
+
+    geos::geom::MultiPolygon *splitPoly = NULL;
+    try {
+      splitPoly = PolygonTools::SplitPolygonOn360(crossingPoly);
+    }
+    // Ignore any pixel footprints that could not be split. This should only be pixels
+    // that contain the pole.
+    catch (IException &) {
+      // See leading comment
+    }
+
+ 
+    delete crossingPoly;
+
+    if (splitPoly != NULL) {
+      // Process the polygons in the split multipolygon as if we were still using the lat/lon vectors
+      for (unsigned int g = 0; g < splitPoly->getNumGeometries(); ++g) {
+        const geos::geom::Polygon *poly =
+            dynamic_cast<const geos::geom::Polygon *>(splitPoly->getGeometryN(g));
+
+        geos::geom::CoordinateSequence *llcoords =
+            poly->getExteriorRing()->getCoordinates().release();
+
+        // Move each coordinate in the exterior ring of this lat/lon polygon to vectors
+        // Ignore any holes in the polygon
+        std::vector<double> tlat;
+        std::vector<double> tlon;
+        for (unsigned int cord = 0; cord < llcoords->getSize() - 1; ++cord) {
+          tlon.push_back(llcoords->getAt(cord).x);
+          tlat.push_back(llcoords->getAt(cord).y);
+        }
+
+        
+        Convert(tlat, tlon);
+        //ProcessPolygons::Rasterize(p_samples, p_lines, values);
+      }
+      return splitPoly;
+      delete splitPoly;
+    }
+  }
+  else { // if does not crosses
+
+    // Make a polygon from the lat/lon vectors and split it on 360
+    geos::geom::CoordinateArraySequence *pts = new geos::geom::CoordinateArraySequence();
+    for (unsigned int i = 0; i < lat.size(); i++) {
+      pts->add(geos::geom::Coordinate(lon[i], lat[i]));
+    }
+    pts->add(geos::geom::Coordinate(lon[0], lat[0]));
+
+    geos::geom::Polygon *crossingPoly = Isis::globalFactory->createPolygon(
+        globalFactory->createLinearRing(pts), NULL);
+
+    return crossingPoly;
+    //ProcessPolygons::Rasterize(p_samples, p_lines, values);
+  }
+  
+}
 
   /**
    * This method gets called from the application with the lat/lon
