@@ -69,9 +69,8 @@ void IsisMain() {
   }
 
   // Vector output 
-  if (ui.GetString("VECTOR") == "1") {
+  if (ui.WasEntered("VNAME")) {
     g_vectorOut = 1;
-	cout << g_vectorOut;
   }
 
   if (ui.GetString("FOVRANGE") == "INSTANTANEOUS") {
@@ -378,13 +377,10 @@ void IsisMain() {
 	    ofstream fout_vrt;
   
 	    QString outFileNameVRT = FileName( outvect.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
-        QString outFileName_noext = FileName( outvect.toLatin1().data() ).removeExtension().expanded();
-	
-	    fout_vrt.open( outFileNameVRT.toLatin1().data() , std::ios_base::app );
-	    // Get the output xsd file name
-  
-	    //id;name;amount;city;geom
-  
+		// get rid of training ./
+        QString outFileName_noext = FileName( outvect.toLatin1().data() ).removeExtension().original().remove(0, 2); 
+		
+	    fout_vrt.open( outFileNameVRT.toLatin1().data()  );
   
 	    fout_vrt << "<OGRVRTDataSource>" << endl;
 	    fout_vrt << "    <OGRVRTLayer name=\""<< outFileName_noext.toLatin1().data() << "\"> " << endl;
@@ -415,7 +411,7 @@ void IsisMain() {
   }
   
   g_processGroundPolygons.Finalize();
-  } // g_vectorOut != 1
+  } 
 
   // WARNING: rasterizePixel() method alters the current state of the camera.
   // If any code is added after this point, you must call setImage to return
@@ -521,7 +517,6 @@ void vectorizePixel(Isis::Buffer &in) {
       }
       // rasterize this ifov and clear vectors for next ifov
       // add Vectorize method
-	  std::cout << "Vector poly\n";
       g_processGroundPolygons.Vectorize(lat, lon, dns, outvect);
 	  
       lat.clear();

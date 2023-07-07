@@ -437,22 +437,12 @@
           filename with '-count-' appended.  The DN values in this output cube indicate how many input pixels
           were included in the average calculation to create the output pixel.
         </description>
+		<exclusions><item>VNAME</item></exclusions>
         <filter>
           *.cub
         </filter>
       </parameter>
-	  
-      <parameter name="VECTOR">
-        <type>string</type>
-		<default><item>false</item></default>
-        <brief>
-          Flag for geospatial vector output
-        </brief>
-        <description>
-			Output to a VECTOR FILE
-        </description>
-      </parameter>
-	  
+	  	  
       <parameter name="VNAME">
         <type>filename</type>
 		<fileMode>output</fileMode>
@@ -463,6 +453,7 @@
         <description>
 			Output VECTOR FILE
         </description>
+		<exclusions><item>TO</item></exclusions>
       </parameter>
 	  
     </group>
