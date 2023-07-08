@@ -44,6 +44,7 @@ ProcessGroundPolygons g_processGroundPolygons;
 Camera *g_incam;
 int g_numIFOVs = 0;
 int g_vectorOut = 0;  // to be set bool in future
+
 QString vectOut;
 QString outvect;
 
@@ -422,7 +423,7 @@ void IsisMain() {
     
   }
   
-  if (g_vectorOut != 1 ) {
+  if ( ui.WasEntered("TO") ) {
   // When there is only one input cube, we want to propagate IsisCube labels to output cubes
   if (list.size() == 1 ) {
     // Note that polygons and original labels are not propagated
