@@ -426,6 +426,7 @@
       <parameter name="TO">
         <type>cube</type>
         <fileMode>output</fileMode>
+		<pixelType>real</pixelType>
 		<default><item>false</item></default>
         <brief>
           Newly mapped cube

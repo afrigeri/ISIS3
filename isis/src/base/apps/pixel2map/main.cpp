@@ -45,6 +45,9 @@ Camera *g_incam;
 int g_numIFOVs = 0;
 int g_vectorOut = 0;  // to be set bool in future
 
+int csamples;
+int clines;
+
 QString vectOut;
 QString outvect;
 
@@ -113,6 +116,10 @@ void IsisMain() {
     icube.open( list[i].toString() );
     bands = icube.bandCount();
     g_incam = icube.camera();
+	
+	csamples = g_incam->Samples();
+	clines =  g_incam->Lines();
+	
 	
 	Spice spi(icube);
 	ogc_SRS = "IAU:" + Isis::toString(spi.target()->naifBodyCode())  + "00";
@@ -322,6 +329,7 @@ void IsisMain() {
   Pvl pvl;
   pvl.addGroup(userGrp);
 
+
   // If there is only one input cube, we need to attach an AlphaCube to the outputs.
   if (list.size() == 1) {
     Cube parent(list[0].toString());
@@ -339,23 +347,14 @@ void IsisMain() {
     }
   }
 
-  // If vector, then no SetStatCubes
-  //if (g_vectorOut == 0) {
-  //    g_processGroundPolygons.SetStatCubes("TO", pvl, bands);
-  //} else {
-  //	  outvect = ui.GetFileName("VNAME");
-  //}
-
   if ( ui.WasEntered("TO") ) {
       g_processGroundPolygons.SetStatCubes("TO", pvl, bands);
   }
   
   if ( ui.WasEntered("TOVECT") ) {
       g_vectorOut = 1;
-	  outvect = ui.GetFileName("TOVECT");
-	  
+	  outvect = ui.GetFileName("TOVECT");  
   }
-
 
   bool useCenter = true;
   if (ui.GetString("METHOD") == "CENTER") {
@@ -366,6 +365,7 @@ void IsisMain() {
   }
  
   g_processGroundPolygons.SetIntersectAlgorithm(useCenter);
+
 
   for (int f = 0; f < list.size(); f++) {
 
@@ -379,17 +379,16 @@ void IsisMain() {
     Cube *icube = processBrick.SetInputCube(list[f].toString(), atts0, 0);
     g_incam = icube->camera();
     
-    if (g_vectorOut == 0) { 
+    if ( ui.WasEntered("TO") )  { 
     	processBrick.StartProcess(rasterizePixel);
 		processBrick.EndProcess();
-		} else {
-			
-		
-		
+		}
+	if ( ui.WasEntered("TOVECT") )  {
+				
 	    ofstream fout_vrt;
   
 	    QString outFileNameVRT = FileName( outvect.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
-		// get rid of training ./
+		// get rid of trailing ./
         QString outFileName_noext = FileName( outvect.toLatin1().data() ).removeExtension().original().remove(0, 2); 
 		
 	    fout_vrt.open( outFileNameVRT.toLatin1().data()  );
@@ -417,15 +416,14 @@ void IsisMain() {
 		processBrick.StartProcess(vectorizePixel);	
 		processBrick.EndProcess();
 		fout_csv.close();
-		
-	
-	}
+	} // IF TOVECT
     
   }
   
   if ( ui.WasEntered("TO") ) {
   // When there is only one input cube, we want to propagate IsisCube labels to output cubes
-  if (list.size() == 1 ) {
+  if (list.size() == 1) {
+    // g_incam->SetImage(csamples,clines);
     // Note that polygons and original labels are not propagated
     g_processGroundPolygons.PropagateLabels(list[0].toString());
     // Tell Process which tables we want to propagate
@@ -433,10 +431,11 @@ void IsisMain() {
     tablesToPropagate << "InstrumentPointing" << "InstrumentPosition" << "BodyRotation"
         << "SunPosition";
     g_processGroundPolygons.PropagateTables(list[0].toString(), tablesToPropagate);
-  }
+    }
   
-  g_processGroundPolygons.Finalize();
-  } 
+   
+  g_processGroundPolygons.EndProcess();
+  }
 
   // WARNING: rasterizePixel() method alters the current state of the camera.
   // If any code is added after this point, you must call setImage to return
@@ -496,7 +495,6 @@ void rasterizePixel(Isis::Buffer &in) {
         lon.push_back(fovVertices[ifov][point].y());
       }
       // rasterize this ifov and clear vectors for next ifov
-      // add Vectorize method
       g_processGroundPolygons.Rasterize(lat, lon, dns);
       lat.clear();
       lon.clear();
