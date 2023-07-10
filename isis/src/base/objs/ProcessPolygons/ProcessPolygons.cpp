@@ -76,9 +76,6 @@ namespace Isis {
   }
 
 
-
-
-
   /**
    * This method does the actuall reading and writing to the cube
    * file.  The Flag parameter is there to help out where the two
@@ -239,7 +236,6 @@ namespace Isis {
     }/*end catch*/
 
   }
-
 
 
   /**

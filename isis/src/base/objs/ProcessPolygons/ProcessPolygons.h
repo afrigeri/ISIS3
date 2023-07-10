@@ -42,7 +42,6 @@ namespace Isis {
    *                                            function to better reflect the command functionality 
    *                                            and to avoid conflicts with Process::SetOutputCube 
    *                                            virtual function.  References #2215.
-   *   @history 2023-07-05 Alessandro Frigeri (INAF) - Added Vectorize methods.
    *                          
    */
   class ProcessPolygons : public Isis::Process {
@@ -69,20 +68,11 @@ namespace Isis {
                      std::vector<double> &lines,
                      int &band, double &value);
 
-      void Vectorize(std::vector<double> &samples,
-                     std::vector<double> &lines,
-                     std::vector<double> &values);
-
-      void Vectorize(std::vector<double> &samples,
-                     std::vector<double> &lines,
-                     int &band, double &value);
-
       void EndProcess();
       void Finalize();
 
     private:
       void FillPolygon(int Flag);
-      void CreateVectorPolygon(int Flag);
       void GetPolygonCoords();
 
       bool m_useCenter;
