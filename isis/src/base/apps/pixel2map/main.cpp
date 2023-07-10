@@ -430,11 +430,7 @@ void IsisMain() {
         << "SunPosition";
     g_processGroundPolygons.PropagateTables(list[0].toString(), tablesToPropagate);
     }
-  
-   
-  
   }
-  
   g_processGroundPolygons.EndProcess();
 
   // WARNING: rasterizePixel() method alters the current state of the camera.
