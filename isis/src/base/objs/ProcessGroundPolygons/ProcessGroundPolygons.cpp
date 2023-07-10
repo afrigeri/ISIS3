@@ -124,10 +124,6 @@ geos::geom::Geometry* ProcessGroundPolygons::Vectorize(std::vector<double> &lat,
                                          std::vector<double> &values) 
 										 {
 
-
-  // setup the WKT writer						
-  geos::io::WKTWriter *wkt = new geos::io::WKTWriter();
-
   
   // Decide if we need to split the poly on the 360 boundry
   // Yes, we can do this better. The lat and lon vectors should be passed in as polygons, but

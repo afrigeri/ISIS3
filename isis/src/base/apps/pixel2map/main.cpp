@@ -547,7 +547,7 @@ void vectorizePixel(Isis::Buffer &in) {
       // add Vectorize method
 	  GndPixel = g_processGroundPolygons.Vectorize(lat, lon, dns);
 	  //cout << GndPixel << endl;
-	  fout_csv <<  "sample" << "," << "line" << ",\"" << wkt->write(GndPixel)  << "\"" << endl;
+	  fout_csv <<  s << "," << l << ",\"" << wkt->write(GndPixel)  << "\"" << endl;
 	  	  
       lat.clear();
       lon.clear();
