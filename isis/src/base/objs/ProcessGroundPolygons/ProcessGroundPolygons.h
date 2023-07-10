@@ -62,7 +62,6 @@ namespace Isis {
       void SetStatCubes(const QString &avgFileName, const QString
                          &countFileName, Isis::CubeAttributeOutput &atts,
                          Isis::Pvl &map, int bands);
-						 
 
       void AppendOutputCube(QString &cube, const QString &avgFileName,
                             const QString &countFileName = "");

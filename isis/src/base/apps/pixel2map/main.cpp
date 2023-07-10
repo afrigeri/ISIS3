@@ -1,7 +1,6 @@
 #define GUIHELPERS
 
 #include "Isis.h"
- 
 #include <QDebug>
 #include <QList>
 #include <QPointF>
@@ -23,7 +22,6 @@
 
 #include "geos/geom/Geometry.h"
 #include "geos/io/WKTWriter.h"
-
 #include "pixel2map.h"
 
 using namespace std;
@@ -434,8 +432,10 @@ void IsisMain() {
     }
   
    
-  g_processGroundPolygons.EndProcess();
+  
   }
+  
+  g_processGroundPolygons.EndProcess();
 
   // WARNING: rasterizePixel() method alters the current state of the camera.
   // If any code is added after this point, you must call setImage to return

@@ -332,10 +332,10 @@ geos::geom::Geometry* ProcessGroundPolygons::Vectorize(std::vector<double> &lat,
   }
 
 
- /**
+  /**
    * This is a method that is called directly from the
    * application.  Using the "TO" parameter we also create a
-   * count cube name.  The we call the overloaded SetStatCubes
+   * count cube name.  Then we call the overloaded SetStatCubes
    * method above.
    *
    * @param parameter
