@@ -111,13 +111,13 @@ namespace Isis {
 /**
  * This method gets called from the application with the lat/lon
  * vertices of a polygon along with a vector of values.
- * The location of the values with in the verctor indicate which
- * band that value gets written to
+ *
+ * it returns a geos::geom::Geometry* WKT representation of the 
+ * geometry
  *
  * @param lat
  * @param lon
  * @param values
- * @param outfile
  */
 geos::geom::Geometry* ProcessGroundPolygons::Vectorize(std::vector<double> &lat,
                                          std::vector<double> &lon,
