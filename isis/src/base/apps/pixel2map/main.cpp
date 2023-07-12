@@ -396,7 +396,7 @@ void IsisMain() {
 	    fout_vrt << "           <LayerSRS>"<<  ogc_SRS.toLatin1().data() << "</LayerSRS>" << endl;
 		fout_vrt << "          <Field name=\"sample\" src=\"sampleno\" type=\"Integer\"/> "<< endl;
 		fout_vrt << "          <Field name=\"line\" src=\"lineno\" type=\"Integer\"/> "<< endl;
-	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" />" << endl;
+	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" reportSrcColumn=\"FALSE\" />" << endl;
 	    fout_vrt << "       </OGRVRTLayer>" << endl;
 	    fout_vrt << "   </OGRVRTDataSource>" << endl;
   
