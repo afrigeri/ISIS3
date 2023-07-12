@@ -17,12 +17,14 @@
 #include "ProcessRubberSheet.h"
 #include "ProjectionFactory.h"
 #include "Pvl.h"
+
 #include "PvlGroup.h"
 #include "Target.h"
 
+#include "pixel2map.h"
+
 #include "geos/geom/Geometry.h"
 #include "geos/io/WKTWriter.h"
-#include "pixel2map.h"
 
 using namespace std;
 using namespace Isis;
@@ -78,10 +80,6 @@ void IsisMain() {
     }
   }
 
-  // Vector output 
-  //if (ui.WasEntered("VNAME")) {
-  //	    g_vectorOut = 1;
-  //}
 
   if (ui.GetString("FOVRANGE") == "INSTANTANEOUS") {
     g_numIFOVs = 1;
@@ -393,9 +391,11 @@ void IsisMain() {
   
 	    fout_vrt << "<OGRVRTDataSource>" << endl;
 	    fout_vrt << "    <OGRVRTLayer name=\""<< outFileName_noext.toLatin1().data() << "\"> " << endl;
-	    fout_vrt << "           <SrcDataSource>" << outvect.toLatin1().data() << "</SrcDataSource>" << endl;
-	    fout_vrt << "           <GeometryType>wkbMultiPolygon</GeometryType>" << endl;
+	    fout_vrt << "           <SrcDataSource relativeToVRT=\"1\">" << outvect.toLatin1().data() << "</SrcDataSource>" << endl;
+	    fout_vrt << "           <GeometryType>wkbPolygon</GeometryType>" << endl;
 	    fout_vrt << "           <LayerSRS>"<<  ogc_SRS.toLatin1().data() << "</LayerSRS>" << endl;
+		fout_vrt << "          <Field name=\"sample\" src=\"sampleno\" type=\"Integer\"/> "<< endl;
+		fout_vrt << "          <Field name=\"line\" src=\"lineno\" type=\"Integer\"/> "<< endl;
 	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" />" << endl;
 	    fout_vrt << "       </OGRVRTLayer>" << endl;
 	    fout_vrt << "   </OGRVRTDataSource>" << endl;
@@ -404,9 +404,9 @@ void IsisMain() {
 		
 
    
-	    // std::ios_base::app -> to append
+	    // write the header
 	    fout_csv.open( outvect.toLatin1().data()  );  
-	    fout_csv << "S" << "," << "L" << "," << "geom" << endl;
+	    fout_csv << "sampleno" << "," << "lineno" << "," << "geom" << endl;
 		fout_csv.close();
 		// open in append mode
 		fout_csv.open( outvect.toLatin1().data(), std::ios_base::app  );
