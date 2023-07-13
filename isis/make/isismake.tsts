@@ -7,7 +7,7 @@ include $(ISISROOT)/make/isismake.os
 .NOTPARALLEL:
 
 # File extensions that valid file types to compare
-BINFILES =  jpg tif bin fits raw bmp png bc img imq
+BINFILES =  jpg tif bin fits raw bmp png bc img imq csv vrt
 PVLFILES =  pvl
 
 # Determine isis path from the current directory and use that path to set the TESTDATA_PATH variable
