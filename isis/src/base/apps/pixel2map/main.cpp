@@ -396,6 +396,7 @@ void IsisMain() {
 	    fout_vrt << "            <LayerSRS>"<<  ogc_SRS.toLatin1().data() << "</LayerSRS>" << endl;
 		fout_vrt << "            <Field name=\"sample\" src=\"sampleno\" type=\"Integer\"/> "<< endl;
 		fout_vrt << "            <Field name=\"line\" src=\"lineno\" type=\"Integer\"/> "<< endl;
+		fout_vrt << "            <Field name=\"pixelvalue\" src=\"pixelvalue\" type=\"Real\"/>" << endl;
 	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" reportSrcColumn=\"FALSE\" />" << endl;
 	    fout_vrt << "    </OGRVRTLayer>" << endl;
 	    fout_vrt << "</OGRVRTDataSource>" << endl;
@@ -406,7 +407,7 @@ void IsisMain() {
    
 	    // write the header
 	    fout_csv.open( outvect.toLatin1().data()  );  
-	    fout_csv << "sampleno" << "," << "lineno" << "," << "geom" << endl;
+	    fout_csv << "sampleno" << "," << "lineno" << "," << "pixelvalue" << "," << "geom" << endl;
 		fout_csv.close();
 		// open in append mode
 		fout_csv.open( outvect.toLatin1().data(), std::ios_base::app  );
@@ -542,8 +543,8 @@ void vectorizePixel(Isis::Buffer &in) {
       // rasterize this ifov and clear vectors for next ifov
       // add Vectorize method
 	  GndPixel = g_processGroundPolygons.Vectorize(lat, lon, dns);
-	  //cout << GndPixel << endl;
-	  fout_csv <<  s << "," << l << ",\"" << wkt->write(GndPixel)  << "\"" << endl;
+	  //cout << dns[0] << endl;
+	  fout_csv <<  s << "," << l << "," << dns[0] << ",\"" << wkt->write(GndPixel)  << "\"" << endl;
 	  	  
       lat.clear();
       lon.clear();
