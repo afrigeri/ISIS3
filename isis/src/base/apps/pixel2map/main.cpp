@@ -384,21 +384,21 @@ void IsisMain() {
 	    ofstream fout_vrt;
   
 	    QString outFileNameVRT = FileName( outvect.toLatin1().data() ).removeExtension().addExtension("vrt").expanded();
-		// get rid of trailing ./
-        QString outFileName_noext = FileName( outvect.toLatin1().data() ).removeExtension().original().remove(0, 2); 
+		QString layer_name = FileName( outvect.toLatin1().data() ).baseName();
+		QString csv_fname = FileName( outvect.toLatin1().data() ).name();
 		
 	    fout_vrt.open( outFileNameVRT.toLatin1().data()  );
   
 	    fout_vrt << "<OGRVRTDataSource>" << endl;
-	    fout_vrt << "    <OGRVRTLayer name=\""<< outFileName_noext.toLatin1().data() << "\"> " << endl;
-	    fout_vrt << "           <SrcDataSource relativeToVRT=\"1\">" << outvect.toLatin1().data() << "</SrcDataSource>" << endl;
-	    fout_vrt << "           <GeometryType>wkbPolygon</GeometryType>" << endl;
-	    fout_vrt << "           <LayerSRS>"<<  ogc_SRS.toLatin1().data() << "</LayerSRS>" << endl;
-		fout_vrt << "          <Field name=\"sample\" src=\"sampleno\" type=\"Integer\"/> "<< endl;
-		fout_vrt << "          <Field name=\"line\" src=\"lineno\" type=\"Integer\"/> "<< endl;
+	    fout_vrt << "    <OGRVRTLayer name=\""<< layer_name.toLatin1().data() << "\"> " << endl;
+	    fout_vrt << "            <SrcDataSource relativeToVRT=\"1\">" << csv_fname.toLatin1().data() << "</SrcDataSource>" << endl;
+	    fout_vrt << "            <GeometryType>wkbPolygon</GeometryType>" << endl;
+	    fout_vrt << "            <LayerSRS>"<<  ogc_SRS.toLatin1().data() << "</LayerSRS>" << endl;
+		fout_vrt << "            <Field name=\"sample\" src=\"sampleno\" type=\"Integer\"/> "<< endl;
+		fout_vrt << "            <Field name=\"line\" src=\"lineno\" type=\"Integer\"/> "<< endl;
 	    fout_vrt << "          <GeometryField encoding=\"WKT\" field=\"geom\" reportSrcColumn=\"FALSE\" />" << endl;
-	    fout_vrt << "       </OGRVRTLayer>" << endl;
-	    fout_vrt << "   </OGRVRTDataSource>" << endl;
+	    fout_vrt << "    </OGRVRTLayer>" << endl;
+	    fout_vrt << "</OGRVRTDataSource>" << endl;
   
 	    fout_vrt.close();
 		
