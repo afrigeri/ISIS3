@@ -18,7 +18,7 @@ find files of those names at the top level of this repository. **/
 #include <QMutex>
 #include <QPair>
 #include <QRect>
-#include <QTime>
+#include <QElapsedTimer>
 
 #include "Area3D.h"
 #include "Brick.h"
@@ -1866,7 +1866,7 @@ namespace Isis {
       CubeIoHandler * ioHandler, QList<Buffer *> buffersToWrite) {
     m_ioHandler = ioHandler;
     m_buffersToWrite = new QList<Buffer *>(buffersToWrite);
-    m_timer = new QTime;
+    m_timer = new QElapsedTimer;
     m_timer->start();
 
     m_ioHandler->m_writeThreadMutex->lock();
@@ -1921,7 +1921,7 @@ namespace Isis {
     // Sorting the buffers didn't seem to have a large positive impact on speed,
     //   but does increase complexity so it's disabled.
 //     QList<Buffer * > buffersToWrite(*m_buffersToWrite);
-//     qSort(buffersToWrite.begin(), buffersToWrite.end(), bufferLessThan);
+//     std::sort(buffersToWrite.begin(), buffersToWrite.end(), bufferLessThan);
 
     // If the buffers have any overlap at all then we can't sort them and still
     //   guarantee the last write() call makes it into the correct place. The

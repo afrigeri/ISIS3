@@ -20,7 +20,6 @@ find files of those names at the top level of this repository. **/
 #include "IString.h"
 
 using namespace std;
-
 namespace Isis {
   /**
    * Executes the Isis program with the given arguments. This will handle logs,
@@ -178,7 +177,6 @@ namespace Isis {
 
       for(int i = 0; i < errorPvl.groups(); i++) {
         PvlGroup &g = errorPvl.group(i);
-        QString eclass = g["Class"];
         QString emsg = g["Message"];
         int ecode = g["Code"];
         QString efile = g["File"];

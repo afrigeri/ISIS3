@@ -948,7 +948,7 @@ namespace Isis {
         }
         modifyPoint(point);
       }
-      else if ( rubberBandTool()->mouseButton() & Qt::MidButton ) {
+      else if ( rubberBandTool()->mouseButton() & Qt::MiddleButton ) {
         if ( !m_controlNet || m_controlNet->GetNumPoints() == 0 ) {
           QString message = "No points exist for deleting.  Create points ";
           message += "using the right mouse button.";
@@ -1626,7 +1626,7 @@ namespace Isis {
     QString header = "Point ID, Latitude, Longitude, Radius, ";
     header += "Elevation, Elevation Error, ";
     header += "Image 1, Sample, Line, Image  2, Sample, Line";
-    text << header << endl;
+    text << header << Qt::endl;
 
     QString leftFile = FileName( m_leftCube->fileName() ).name();
     QString rightFile = FileName( m_rightCube->fileName() ).name();
@@ -1648,7 +1648,7 @@ namespace Isis {
              rightFile + "," +
              QString::number( p.GetMeasure(Right)->GetSample() ) + "," +
              QString::number( p.GetMeasure(Right)->GetLine() );
-      text << data << endl;
+      text << data << Qt::endl;
     }
     m_currentFile.close();
 

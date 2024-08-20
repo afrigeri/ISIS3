@@ -479,7 +479,7 @@ namespace Isis {
       }
       modifyPoint(point);
     }
-    else if (s == Qt::MidButton) {
+    else if (s == Qt::MiddleButton) {
       if (!p_controlNet || p_controlNet->GetNumPoints() == 0) {
         QString message = "No points exist for deleting.  Create points ";
         message += "using the right mouse button.";
@@ -855,8 +855,10 @@ namespace Isis {
       QString msgTitle = "Update camera pointing?";
 //      QDialog resultsDialog((QWidget *)parent(),"Bundle Adjust Summary",true);
 
-      QMessageBox msgBox(QMessageBox::Question, msgTitle, message, 0, p_tieTool,
-                         Qt::Dialog);
+      QMessageBox msgBox;
+      msgBox.setIcon(QMessageBox::Question);
+      msgBox.setWindowTitle(msgTitle);
+      msgBox.setText(message);
       QPushButton *update = msgBox.addButton("Update", QMessageBox::AcceptRole);
       update->setToolTip("Update camera pointing on \"Match\" cube labels.");
       update->setWhatsThis("Update the camera angles on the \"Match\" cube "

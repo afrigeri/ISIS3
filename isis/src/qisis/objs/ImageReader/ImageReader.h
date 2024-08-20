@@ -72,7 +72,7 @@ namespace Isis {
       void read(Iterator begin, Iterator end) {
         int numNewEntries = 0;
         while (begin != end) {
-          m_backlog.append(qVariantFromValue(*begin));
+          m_backlog.append(QVariant::fromValue(*begin));
           numNewEntries++;
           begin++;
         }
@@ -117,8 +117,8 @@ namespace Isis {
        *
        * @internal
        */
-      class VariantToImageFunctor : public std::unary_function<
-          const QVariant &, Image *> {
+      class VariantToImageFunctor : public std::function<
+          Image *(const QVariant &)> {
 
         public:
           VariantToImageFunctor(QMutex *cameraMutex, bool requireFootprints, QThread *targetThread,

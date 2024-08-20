@@ -66,33 +66,13 @@ endfunction(copy_app_docs_info)
 # Build the top level of the documents directory
 function(build_upper_level)
 
-  # Make new (empty) output folders
-  set(newFolders UserStart UserLearn UserExplore UserInspire
-                 DevStart  DevLearn  DevExplore  DevInspire
-                 UserDocs General Guides Installation TechnicalInfo)
-  foreach(f ${newFolders})
-    file(MAKE_DIRECTORY "${docInstallFolder}/${docVersion}/${f}")
-  endforeach()
-
   # Copy the assets folder to the specific version directory
+  file(MAKE_DIRECTORY "${docInstallFolder}/${docVersion}/assets")
   copy_folder(${docBuildFolder}/assets ${docInstallFolder}/${docVersion})
-  # Also copy the assest folder to the base area so the base index.html can use it
-  # TODO - eliminate this copy of assest by having a simple top index.html that redirects to the vx.y.z/index.html. The top index should contain html base so it uses vx.y.z assets
-  copy_folder(${docBuildFolder}/assets ${docInstallFolder})
-
-  # Copy other folders to the specific version directory
-  copy_folder(${docBuildFolder}/w3c    ${docInstallFolder}/${docVersion})
-
-  # These folders are populated inside "build_documents_folder"
-
-  # Create a redirect for the top level index file. It points to the version index file
-  execute_process(COMMAND ${XALAN} ${XALAN_VALIDATE_OPTION} ${XALAN_PARAM_OPTION} menuPath \"${docVersion}/\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/index.html ${XALAN_INFILE_OPTION} ${docBuildFolder}/build/redirect.xml ${XALAN_XSL_OPTION} ${docBuildFolder}/build/redirect.xsl)
+  
   # Create the main documentaion page. This is located in the version directory 
   execute_process(COMMAND ${XALAN} ${XALAN_VALIDATE_OPTION} ${XALAN_PARAM_OPTION} menuPath \"\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/index.html ${XALAN_INFILE_OPTION} ${docBuildFolder}/build/homepage.xml ${XALAN_XSL_OPTION} ${docBuildFolder}/build/main.xsl)
 
- # This folder just gets copied as-is
- # Note: Schemas are referenced inside the application xml files. The schema URI inside the xmls do not have version numbers in the path 
- execute_process(COMMAND cp -r ${PROJECT_SOURCE_DIR}/src/docsys/Schemas  ${docInstallFolder}/Schemas)
 
 endfunction(build_upper_level)
 
@@ -173,48 +153,6 @@ function(build_documents_folder)
     endif()
 
   endforeach()
-
-  message("    Building table of contents files...")
-  # These go in top level folders in /doc/
-
-  # GENERAL TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/General/index.html ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/General.xsl)
-
-  # GUIDES TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/Guides/index.html ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/Guides.xsl)
-
-  # INSTALLATION TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/Installation/index.html ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/Installation.xsl)
-
-  # TECHNICAL INFO TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/TechnicalInfo/index.html ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/TechnicalInfo.xsl)
-
-  # USER DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/UserDocs/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/UserDocs.xsl)
-
-  # USER GETTING STARTED DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/UserStart/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/UserStart.xsl)
-
-  # USER LEARN MORE DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/UserLearn/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/UserLearn.xsl)
-
-  # USER EXPLORE IN DETAIL DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/UserExplore/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/UserExplore.xsl)
-
-  # USER GET INSPIRED DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/UserInspire/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/UserInspire.xsl)
-
-  # DEV GETTING STARTED DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/DevStart/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/DevStart.xsl)
-
-  # DEV LEARN MORE DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/DevLearn/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/DevLearn.xsl)
-
-  # DEV EXPLORE IN DETAIL DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/DevExplore/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/DevExplore.xsl)
-
-  # DEV GET INSPIRED DOCS TOC
-  execute_process(COMMAND ${XALAN} ${XALAN_PARAM_OPTION} menuPath \"../\" ${XALAN_OUTFILE_OPTION} ${docInstallFolder}/${docVersion}/DevInspire/index.html    ${XALAN_INFILE_OPTION} ${doctocPath} ${XALAN_XSL_OPTION} ${docBuildFolder}/build/DevInspire.xsl)
 
 endfunction(build_documents_folder)
 
@@ -363,7 +301,7 @@ function(build_object_conf)
   # apps_tag.conf doesnt exist?
   cat(${objConfDir}/apps_tag.conf ${appsConf})
   file(APPEND ${appsConf} "LATEX_CMD_NAME   = ${LATEX}\n")
-  file(APPEND ${appsConf} "OUTPUT_DIRECTORY = ${docInstallDir}/${docVersion}\n")
+  file(APPEND ${appsConf} "OUTPUT_DIRECTORY = ${docInstallDir}/\n")
   file(APPEND ${appsConf} "STRIP_FROM_PATH  = ${PROJECT_SOURCE_DIR}/\n")
   file(APPEND ${appsConf} "INPUT            = ${PROJECT_SOURCE_DIR}/src/ ${objConfDir}/isisDoxyDefs.doxydef\n")
   file(APPEND ${appsConf} "HTML_HEADER      = ${objConfDir}/IsisObjectHeader.html\n")
@@ -377,7 +315,7 @@ function(build_object_conf)
 
   # Append to the programmer conf file
   cat(${objConfDir}/Programmer.conf ${programmerConf})
-  file(APPEND ${programmerConf} "OUTPUT_DIRECTORY = ${docInstallDir}/${docVersion}\n")
+  file(APPEND ${programmerConf} "OUTPUT_DIRECTORY = ${docInstallDir}/\n")
   file(APPEND ${programmerConf} "FILE_PATTERNS    = *objs*.h")
   file(APPEND ${programmerConf} " *objs*.cpp")
   file(APPEND ${programmerConf} " *build/isisDoxyDefs.doxydef\n")
@@ -414,7 +352,7 @@ function(build_object_conf)
   # Append to the developer conf file
   cat(${objConfDir}/Developer.conf ${developerConf})
   file(APPEND ${developerConf} "LATEX_CMD_NAME   = ${LATEX}\n")
-  file(APPEND ${developerConf} "OUTPUT_DIRECTORY = ${docInstallDir}/${docVersion}\n")
+  file(APPEND ${developerConf} "OUTPUT_DIRECTORY = ${docInstallDir}/\n")
   file(APPEND ${developerConf} "STRIP_FROM_PATH  = ${CMAKE_INSTALL_PREFIX}/\n")
   file(APPEND ${developerConf} "INPUT            = ${PROJECT_SOURCE_DIR}/src/ ${objConfDir}/isisDoxyDefs.doxydef\n")
   file(APPEND ${developerConf} "HTML_HEADER      = ${objConfDir}/IsisObjectHeader.html\n")
