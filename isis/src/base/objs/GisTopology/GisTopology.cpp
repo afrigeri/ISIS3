@@ -330,7 +330,7 @@ namespace Isis {
     va_list ap;
     va_start(ap, fmt);
     char buffer[1024];
-    vsnprintf(buffer, sizeof(buffer), fmt, ap);
+    vsprintf(buffer, fmt, ap);
     va_end(ap);
     throw IException(IException::Programmer, buffer, _FILEINFO_);
   }
@@ -347,7 +347,7 @@ namespace Isis {
     va_list ap;
     va_start(ap, fmt);
     char buffer[1024];
-    vsnprintf(buffer, sizeof(buffer), fmt, ap);
+    vsprintf(buffer, fmt, ap);
     va_end(ap);
     throw IException(IException::Programmer, buffer, _FILEINFO_);
   }
@@ -376,7 +376,6 @@ namespace Isis {
   GEOSWKTWriter *GisTopology::wktWriter() {
     if (!m_WKTwriter) {
       m_WKTwriter = GEOSWKTWriter_create();
-      GEOSWKTWriter_setTrim(m_WKTwriter, 1);
     }
     return (m_WKTwriter);
   }

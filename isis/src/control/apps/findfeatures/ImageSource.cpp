@@ -92,7 +92,7 @@ bool ImageSource::hasCamera() const {
 QString ImageSource::getTargetName() const {
   if ( hasProjection() ) {
     PvlGroup mapping = m_data->m_projection->Mapping();
-    return (mapping["TargetName"][0]);
+    return (mapping["Target"][0]);
   }
   else if ( hasCamera() ) {
     return ( m_data->m_camera->targetName() );
@@ -218,20 +218,18 @@ SurfacePoint ImageSource::getLatLon(const double &line, const double &sample) {
 
   // Check for projection first and translate
   if ( hasProjection() ) {
-    TProjection *proj = m_data->projection();
-    if ( proj->SetWorld(sample, line) ) {
-      double lat    = proj->UniversalLatitude();
-      double lon    = proj->UniversalLongitude();
-      double radius = proj->LocalRadius(lat);
+    if ( m_data->m_projection->SetCoordinate(sample, line) ) {
+      double lat = m_data->m_projection->UniversalLatitude();
+      double lon = m_data->m_projection->UniversalLongitude();
+      double radius = m_data->m_projection->LocalRadius(lat);
       point.SetSphericalCoordinates(Latitude(lat, Angle::Degrees),
                                     Longitude(lon, Angle::Degrees),
                                     Distance(radius, Distance::Meters));
     }
   }
   else if ( hasCamera() ) {
-    Camera *camera = m_data->camera();
-    if ( camera->SetImage(sample, line) ) {
-      point = camera->GetSurfacePoint();
+    if ( m_data->m_camera->SetImage(sample, line) ) {
+      point = m_data->m_camera->GetSurfacePoint();
     }
   }
 
@@ -258,21 +256,19 @@ bool ImageSource::getLineSamp(const SurfacePoint &point,
 
   // Check for projection first and translate
   if ( hasProjection() ) {
-     TProjection *proj = m_data->projection();
-    if ( proj->SetUniversalGround(lat, lon) ) {
+    if ( m_data->m_projection->SetUniversalGround(lat, lon) ) {
       isGood = true;
-      line   = proj->WorldY();
-      samp   = proj->WorldX();
-      radius = proj->LocalRadius();
+      line   = m_data->m_projection->WorldY();
+      samp   = m_data->m_projection->WorldX();
+      radius = m_data->m_projection->LocalRadius();
     }
   }
   else if ( hasCamera() ) {
-    Camera *camera = m_data->camera();
-    if ( camera->SetUniversalGround(lat, lon) ) {
+    if ( m_data->m_camera->SetUniversalGround(lat, lon) ) {
       isGood = true;
-      line   = camera->Line();
-      samp   = camera->Sample();
-      radius = camera->LocalRadius().meters();
+      line   = m_data->m_camera->Line();
+      samp   = m_data->m_camera->Sample();
+      radius = m_data->m_camera->LocalRadius().meters();
     }
   }
 
@@ -315,7 +311,7 @@ cv::Mat ImageSource::getGeometryMapping(ImageSource &match,
     train.clear();
 
   #if 0
-    std::cout << "\nSSamp, NSamps: " << ssamp << ", " << nsamps << "\n";
+    std::cout << "SSamp, NSamps: " << ssamp << ", " << nsamps << "\n";
     std::cout << "SLine, NLines: " << sline << ", " << nlines << "\n";
     std::cout << "SINC, LINC:    " << sSpacing << ", " << lSpacing << "\n";
     std::cout << "Increment:     " << increment << "\n";
@@ -409,11 +405,12 @@ bool ImageSource::initGeometry(Cube &cube) {
   bool gotOne(false);
   try {
     if ( cube.isProjected() ) {
-      m_data->m_projection = ProjectionFactory::CreateFromCube( *cube.label() );
+      int ns, nl;
+      m_data->m_projection =  ((TProjection *) ProjectionFactory::CreateForCube(*cube.label(), ns, nl, true) );
       gotOne = true;
     }
 
-    // Try camera also, independently
+    // Try camera also, independantly
     m_data->m_camera= ( CameraFactory::Create(cube) );
     gotOne = true;
   }

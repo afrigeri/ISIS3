@@ -19,6 +19,7 @@ find files of those names at the top level of this repository. **/
 #include "IString.h"
 #include "SpecialPixel.h"
 
+#include "AbstractTableModel.h"
 #include "TableColumn.h"
 
 

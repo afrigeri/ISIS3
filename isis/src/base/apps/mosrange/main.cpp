@@ -9,16 +9,12 @@ find files of those names at the top level of this repository. **/
 
 #include "Application.h"
 #include "Pvl.h"
-#include "UserInterface.h"
 #include "mosrange.h"
 
 using namespace Isis;
 
 void IsisMain() {
   UserInterface &ui = Application::GetUserInterface();
-  Pvl results = mosrange(ui);
-
-  for (int resultIndex = 0; resultIndex < results.groups(); resultIndex++) {
-      Application::Log(results.group(resultIndex));
-  }
+  Pvl appLog;
+  mosrange(ui, &appLog); 
 }

@@ -164,7 +164,8 @@ namespace Isis {
 
           // Index into buffer is current sample - start sample
             //   *Brick indices are in units of cube pixels, not screen pixels
-          int brickIndex = data->Index((int)(samp + 0.5), (int)(line + 0.5), p_band);
+            int brickIndex = data->Index((int)(samp + 0.5), (int)(line + 0.5),
+                                         p_band);
 
             if(brickIndex < 0) {
               p_buffer.at(yIndex).at(xIndex) = data->at(0);
@@ -754,14 +755,7 @@ namespace Isis {
    * @return bool
    */
   bool ViewportBuffer::working() {
-    bool hasFillAction = false;
-    for (auto action : *p_actions) {
-      if (action->getActionType() == ViewportBufferAction::fill) {
-        hasFillAction = true;
-        break;
-      }
-    }
-    return hasFillAction || !p_bufferInitialized || !p_enabled;
+    return !p_actions->empty() || !p_bufferInitialized || !p_enabled;
   }
 
 

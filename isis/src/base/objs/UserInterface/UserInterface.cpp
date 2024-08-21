@@ -101,7 +101,6 @@ namespace Isis {
     }
   }
 
-
   //! Destroys the UserInterface object
   UserInterface::~UserInterface() {
     // can't unit test - p_gui will be NULL in unit test
@@ -484,8 +483,6 @@ namespace Isis {
 
         // resolve the reserved parameter (e.g. set -h to -HELP)
         paramName = resolveParameter(paramName, options);
-        
-
 
         // Prevent double handling of -LAST to prevent conflicts
         // Keep track of using -LAST to prevent conflicts with -BATCHLIST
@@ -917,7 +914,6 @@ namespace Isis {
     }
     else if (name == "-PREFERENCE") {
       p.Load(value);
-      p_preference = value;
     }
     else if (name == "-LOG") {
       if( value.isEmpty() ) {
@@ -939,7 +935,6 @@ namespace Isis {
       throw IException(IException::Unknown, msg, _FILEINFO_);
     }
   }
-
 
 
   /**

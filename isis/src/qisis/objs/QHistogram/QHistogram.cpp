@@ -132,8 +132,7 @@ namespace Isis {
     // Initialize a printer
     static QPrinter *printer = NULL;
     if(printer == NULL) printer = new QPrinter;
-    QPageSize pageSize(QPageSize::Letter);
-    printer->setPageSize(pageSize);
+    printer->setPageSize(QPrinter::Letter);
     printer->setColorMode(QPrinter::Color);
 
     QPrintDialog printDialog(printer, (QWidget *)parent());

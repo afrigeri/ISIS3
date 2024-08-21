@@ -349,7 +349,7 @@ void FixLabel(Pvl &pcPdsLbl, bool &pbLevel2) {
 
   if(pbLevel2) {
     char buff[62];
-    snprintf(buff, sizeof(buff),  "%d", iCheckSum);
+    sprintf(buff, "%d", iCheckSum);
     PvlKeyword cKeyChkSum("CHECKSUM", buff);
     cImageObject += cKeyChkSum;
   }

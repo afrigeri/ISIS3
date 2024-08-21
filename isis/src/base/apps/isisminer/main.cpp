@@ -15,7 +15,6 @@
 #include <QString>
 #include <QStringList>
 #include <QTime>
-#include <QElapsedTimer>
 
 // boost library
 #include <boost/foreach.hpp>
@@ -66,10 +65,10 @@ void IsisMain() {
     globals->add("PARAMETERS", parameters);
     
     // Split by separate parameters
-    QStringList parmlist = parameters.split("@", Qt::SkipEmptyParts);
+    QStringList parmlist = parameters.split("@", QString::SkipEmptyParts);
     BOOST_FOREACH (QString parm, parmlist) {
       // Split values from keyword name
-      QStringList keyval = parm.split(":", Qt::SkipEmptyParts);
+      QStringList keyval = parm.split(":", QString::SkipEmptyParts);
       if ( keyval.size() != 2 ) {
         QString mess = "Ill-formed PARAMETERS (" + parm + ") - use form @key:val";
         throw IException(IException::User, mess, _FILEINFO_);
@@ -77,7 +76,7 @@ void IsisMain() {
 
       // Now split multi string values and construct the Pvl keyword
       QString keyname = keyval[0];
-      QStringList values =  keyval[1].split(",", Qt::SkipEmptyParts);
+      QStringList values =  keyval[1].split(",", QString::SkipEmptyParts);
       PvlKeyword keyword(keyname);
       BOOST_FOREACH ( QString val, values) {
         keyword.addValue(val);
@@ -114,14 +113,13 @@ void IsisMain() {
          << " (TimeIn:  " << stime.toString("hh:mm:ss.zzz") 
          << ")\n"
          << "Description: " << strategy->description() << "\n";
-    QElapsedTimer stimer;
-    stimer.start();
+    stime.start();
     int n = strategy->apply(resources);
     unsigned int ntotal = strategy->totalProcessed();
     cout << n << " of " << ntotal << " processed in " 
          << strategy->type() << "::" << strategy->name() 
          << " (TimeOut: " << QTime::currentTime().toString("hh:mm:ss.zzz") << ")\n";
-    cout << "ElapsedTime(s): " << stimer.elapsed() / 1000  << "\n";
+    cout << "ElapsedTime(s): " << stime.elapsed() / 1000  << "\n";
   }
 
   // Get total elapded time

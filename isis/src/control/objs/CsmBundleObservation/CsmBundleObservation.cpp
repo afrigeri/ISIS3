@@ -232,30 +232,30 @@ namespace Isis {
       adjustedSigma = QString::number(m_adjustedSigmas[i], 'f', 8);
       sigma = (IsSpecial(m_aprioriSigmas[i]) ? "FREE" : toString(m_aprioriSigmas[i], 8));
 
-      snprintf(buf, sizeof(buf), "%.11s", parameterNamesList.at(i).toStdString().c_str());
+      sprintf(buf,"%.11s", parameterNamesList.at(i).toStdString().c_str());
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "%18.8lf  ", finalParameterValues[i] - correction);
+      sprintf(buf,"%18.8lf  ", finalParameterValues[i] - correction);
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "%20.8lf  ", correction);
+      sprintf(buf,"%20.8lf  ", correction);
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "%23.8lf  ", finalParameterValues[i]);
+      sprintf(buf,"%23.8lf  ", finalParameterValues[i]);
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "            ");
+      sprintf(buf,"            ");
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "%6s", sigma.toStdString().c_str());
+      sprintf(buf,"%6s", sigma.toStdString().c_str());
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "            ");
+      sprintf(buf,"            ");
       fpOut << buf;
       if (errorPropagation) {
-        snprintf(buf, sizeof(buf), "%s", adjustedSigma.toStdString().c_str());
+        sprintf(buf,"%s", adjustedSigma.toStdString().c_str());
       }
       else {
-        snprintf(buf, sizeof(buf),  "%s","N/A");
+        sprintf(buf, "%s","N/A");
       }
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "        ");
+      sprintf(buf,"        ");
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "%s\n", parameterUnitList.at(i).toStdString().c_str());
+      sprintf(buf,"%s\n", parameterUnitList.at(i).toStdString().c_str());
       fpOut << buf;
 
     }

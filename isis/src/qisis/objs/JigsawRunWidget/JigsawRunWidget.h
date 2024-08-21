@@ -153,7 +153,7 @@ namespace Isis {
      * @internal
      */
     class CopyImageToResultsFunctor :
-        public std::function<Cube *(const FileName &)> {
+        public std::unary_function<const FileName &, Cube *> {
       public:
         CopyImageToResultsFunctor(const QDir &destination);
         ~CopyImageToResultsFunctor();

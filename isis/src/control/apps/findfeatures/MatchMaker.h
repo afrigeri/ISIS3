@@ -29,28 +29,21 @@ namespace Isis {
 class ControlNet;
 class ControlPoint;
 class ControlMeasure;
-class SurfacePoint;
 
 /**
  * @brief Container for a feature match pair/set of data sources
  *
- * The GeometrySourceFlag determines the source of the ControlPoint 
- * latitude/longitude coordinate. If Both, then Query take precidence. The Both 
- * option will ensure the Query and all Train images have valid geometry. 
- *  
  *
  * @author 2015-08-18 Kris Becker
  * @internal
  *   @history 2015-08-18 Kris Becker - Original Version
  *   @history 2015-09-29 Kris Becker - Had line/sample transposed when computing
  *                           apriori lat/lon
- *   @history 2021-10-30 Kris Becker Add Both enum to invoke error checking;
- *                           added getSurfacePoint() method.
  */
 
 class MatchMaker : public QLogger {
   public:
-    enum GeometrySourceFlag { None, Query, Train, Both };
+    enum GeometrySourceFlag { None, Query, Train };
     MatchMaker();
     MatchMaker(const QString &name,
                const PvlFlatMap &parameters = PvlFlatMap(),
@@ -119,8 +112,6 @@ class MatchMaker : public QLogger {
     ControlMeasure *makeMeasure(const MatchImage &image,
                                 const int &keyindex,
                                 const QString &name = "ControlMeasure") const;
-    SurfacePoint getSurfacePoint(const ControlMeasure &measure, 
-                                 const MatchImage &image) const;
     bool setAprioriLatLon(ControlPoint &point, const ControlMeasure &measure,
                           const MatchImage &image) const;
 

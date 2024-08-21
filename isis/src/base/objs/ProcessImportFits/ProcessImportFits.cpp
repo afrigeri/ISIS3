@@ -118,7 +118,7 @@ namespace Isis {
               line.TrimHead(" ");
             }
             // If the line still has anything in it, treat it is as a comment.
-            if (line.size() > 2) {
+            if (line.size() > 0) {
               line.TrimHead(" /");
               label.addComment(line.ToQt());
               // A possible format for units, other possiblites exist.

@@ -60,7 +60,8 @@ namespace Isis {
    *
    */
   void EllipsoidShape::calculateDefaultNormal()  {
-    calculateSurfaceNormal();
+    QVector <double *> points;
+    calculateLocalNormal(points);
   }
 
 
@@ -70,8 +71,6 @@ namespace Isis {
   void EllipsoidShape::calculateSurfaceNormal()  {
     QVector <double *> points;
     calculateLocalNormal(points);
-
-    setNormal(localNormal());
   }
 
 
@@ -130,8 +129,8 @@ namespace Isis {
     surfnm_c(a, b, c, pB, (SpiceDouble *) &normal[0]);
     NaifStatus::CheckErrors();
 
-    setLocalNormal(normal);
-    setHasLocalNormal(true);
+    setNormal(normal);
+    setHasNormal(true);
   }
 
 

@@ -9,18 +9,16 @@ find files of those names at the top level of this repository. **/
 #include "ProjectItemTreeView.h"
 
 #include <QAbstractItemView>
+#include <QDesktopWidget>
 #include <QEvent>
 #include <QObject>
 #include <QRect>
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QGuiApplication>
-#include <QScreen>
 
 #include "ProjectItem.h"
 #include "ProjectItemModel.h"
-
 
 namespace Isis {
   /**
@@ -61,7 +59,8 @@ namespace Isis {
    * @return @b QSize The size hint
    */
   QSize ProjectItemTreeView::sizeHint() const {
-    QRect availableSpace = (QGuiApplication::primaryScreen()->availableGeometry());
+    QDesktopWidget deskTop;
+    QRect availableSpace = deskTop.availableGeometry(deskTop.primaryScreen());
     return QSize(.15 * availableSpace.width(), .5 * availableSpace.height());
   }
 

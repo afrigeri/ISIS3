@@ -67,7 +67,8 @@ namespace Isis {
        * @internal
        *   @history 2012-09-28 Kimberly Oyama - Changed member variables to be prefixed with "m_".
        */
-      class CreateRootItemFunctor : public std::function <ImageParentItem *(const QString)> {
+      class CreateRootItemFunctor : public std::unary_function <
+          const QString, ImageParentItem * > {
         public:
           CreateRootItemFunctor(AbstractTreeModel *tm, ControlNet *net, QThread *tt);
           CreateRootItemFunctor(const CreateRootItemFunctor &);

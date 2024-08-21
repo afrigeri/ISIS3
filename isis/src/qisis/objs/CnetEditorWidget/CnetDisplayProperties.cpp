@@ -45,7 +45,6 @@ namespace Isis {
     useFileNames = true;
     m_curComposing = false;
     m_showFullPath = false;
-    m_coordinateDisplayType = LatLonRadius;
 
     m_readWriteLock = new QReadWriteLock;
 
@@ -201,17 +200,6 @@ namespace Isis {
   }
 
 
-  /**
-   * Returns coordinate display type (0 = LatLonRadius, 1 = XYZ).
-   *
-   * @return enum CnetDisplayProperties::coordinateDisplayType.
-   *
-   */
-  enum CnetDisplayProperties::coordinateDisplayType CnetDisplayProperties::coordinateDisplayType() {
-      return Isis::CnetDisplayProperties::m_coordinateDisplayType;
-  }
-
-
   void CnetDisplayProperties::setCubeList(QString fileName) {
     QFile imageListFile(fileName);
 
@@ -266,19 +254,6 @@ namespace Isis {
 
   void CnetDisplayProperties::setShowsFullPaths(bool newState) {
     m_showFullPath = newState;
-  }
-
-
-  /**
-   * Sets the coordinate display type (0 = LatLonRadius, 1 = XYZ).
-   *
-   * @param coordDisplay coordinate display type.
-   *
-   * @return void.
-   *
-   */
-  void CnetDisplayProperties::setCoordinateDisplayType(enum coordinateDisplayType coordDisplay) {
-      m_coordinateDisplayType = coordDisplay;
   }
 
 

@@ -7,8 +7,7 @@ find files of those names at the top level of this repository. **/
 #include <QDebug>
 #include <QDataStream>
 #include <QXmlStreamWriter>
-#include <QXmlStreamReader>
-#include <QFile>
+#include <QXmlInputSource>
 
 #include <iostream>
 
@@ -16,6 +15,7 @@ find files of those names at the top level of this repository. **/
 #include "IException.h"
 #include "Preference.h"
 #include "Statistics.h"
+#include "XmlStackedHandlerReader.h"
 
 using namespace std;
 using namespace Isis;
@@ -33,7 +33,8 @@ using namespace Isis;
 namespace Isis {
   class StatisticsXmlHandlerTester : public Statistics {
     public:
-      StatisticsXmlHandlerTester(QXmlStreamReader *reader, FileName xmlFile) : Statistics() {
+      StatisticsXmlHandlerTester(Project *project, XmlStackedHandlerReader *reader, 
+                                     FileName xmlFile) : Statistics(project, reader) {
 
         QString xmlPath(xmlFile.expanded());
         QFile file(xmlPath);
@@ -44,15 +45,15 @@ namespace Isis {
                            _FILEINFO_);
         }
 
-        if (reader->readNextStartElement()) {
-            if (reader->name() == "statistics") {
-              readStatistics(reader);
-            }
-            else {
-              reader->raiseError(QObject::tr("Incorrect file"));
-            }
-          }
+        QXmlInputSource xmlInputSource(&file);
+        bool success = reader->parse(xmlInputSource);
+        if (!success) {
+          throw IException(IException::Unknown, 
+                           QString("Failed to parse xml file, [%1]").arg(xmlPath),
+                            _FILEINFO_);
         }
+
+      }
 
       ~StatisticsXmlHandlerTester() {
       }
@@ -387,15 +388,8 @@ int main(int argc, char *argv[]) {
     qXmlFile.close();
     // read xml    
     qDebug() << "Testing XML: read XML to Statistics object...";
-
-    if(!qXmlFile.open(QFile::ReadOnly | QFile::Text)){
-      throw IException(IException::Unknown,
-                        QString("Failed to parse xml file, [%1]").arg(qXmlFile.fileName()),
-                        _FILEINFO_);
-    }
-
-    QXmlStreamReader reader(&qXmlFile);
-    StatisticsXmlHandlerTester statsFromXml(&reader, xmlFile);
+    XmlStackedHandlerReader reader;
+    StatisticsXmlHandlerTester statsFromXml(project, &reader, xmlFile);
     qDebug() << "Average:             " << statsFromXml.Average();
     qDebug() << "Variance:            " << statsFromXml.Variance();
     qDebug() << "Rms:                 " << statsFromXml.Rms();
@@ -427,15 +421,7 @@ int main(int argc, char *argv[]) {
     // read xml with no attributes or values
     qDebug() << "Testing XML: read XML with no attributes or values to Statistics object...";
     FileName emptyXmlFile("./unitTest_NoElementValues.xml");
-    
-    QFile xml(emptyXmlFile.expanded());
-    if(!xml.open(QFile::ReadOnly | QFile::Text)){
-      throw IException(IException::Unknown,
-                        QString("Failed to parse xml file, [%1]").arg(xml.fileName()),
-                        _FILEINFO_);
-    }
-    QXmlStreamReader reader2(&xml);
-    StatisticsXmlHandlerTester statsFromEmptyXml(&reader2, emptyXmlFile);
+    StatisticsXmlHandlerTester statsFromEmptyXml(project, &reader, emptyXmlFile);
     qDebug() << "Average:             " << statsFromEmptyXml.Average();
     qDebug() << "Variance:            " << statsFromEmptyXml.Variance();
     qDebug() << "Rms:                 " << statsFromEmptyXml.Rms();

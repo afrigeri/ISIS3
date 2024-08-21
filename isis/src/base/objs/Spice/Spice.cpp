@@ -194,16 +194,19 @@ namespace Isis {
     //  ephemerides. (2008-02-27 (KJB))
     if (m_usingNaif) {
       try {
-        if (isd == NULL) {
+        // At this time ALE does not compute pointing for the nadir option in spiceinit
+        // If NADIR is turned on fail here so ISIS can create nadir pointing
+        if (kernels["InstrumentPointing"][0].toUpper() == "NADIR") {
+          QString msg = "Falling back to ISIS generation of nadir pointing";
+          throw IException(IException::Programmer, msg, _FILEINFO_);
+        }
+
+        if (isd == NULL){
           // try using ALE
           std::ostringstream kernel_pvl;
           kernel_pvl << kernels;
 
           json props;
-          if (kernels["InstrumentPointing"][0].toUpper() == "NADIR") {
-            props["nadir"] = true;
-          }
-
           props["kernels"] = kernel_pvl.str();
 
           isd = ale::load(lab.fileName().toStdString(), props.dump(), "ale", false, false, true);
@@ -437,7 +440,7 @@ namespace Isis {
 
     //  2009-03-18  Tracie Sucharski - Removed test for old keywords, any files
     // with the old keywords should be re-run through spiceinit.
-    if (kernels["InstrumentPointing"][0].toUpper() == "NADIR" && !isUsingAle()) {
+    if (kernels["InstrumentPointing"][0].toUpper() == "NADIR") {
       if (m_instrumentRotation) {
         delete m_instrumentRotation;
         m_instrumentRotation = NULL;

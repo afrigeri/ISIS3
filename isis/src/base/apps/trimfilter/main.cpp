@@ -27,13 +27,6 @@ void IsisMain() {
   double low = -DBL_MAX;
   double high = DBL_MAX;
   int minimum;
-
-  if(ui.WasEntered("LOW")) {
-    low = ui.GetDouble("LOW");
-  }
-  if(ui.WasEntered("HIGH")) {
-    high = ui.GetDouble("HIGH");
-  }
   if(ui.GetString("MINOPT") == "PERCENTAGE") {
     int size = lines * samples;
     double perc = ui.GetDouble("MINIMUM") / 100;
@@ -42,7 +35,6 @@ void IsisMain() {
   else {
     minimum = (int) ui.GetDouble("MINIMUM");
   }
-
   p.SetFilterParameters(samples, lines, low, high, minimum);
 
   // Process each line

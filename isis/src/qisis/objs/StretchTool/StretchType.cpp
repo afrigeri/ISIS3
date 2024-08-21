@@ -187,7 +187,7 @@ namespace Isis {
     Stretch stretch = getStretch();
 
     // Add the pairs to the file
-    stream << stretch.Text() << Qt::endl;
+    stream << stretch.Text() << endl;
 
     outfile.close();
   }

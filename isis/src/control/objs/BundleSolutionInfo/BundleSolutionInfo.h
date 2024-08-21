@@ -18,10 +18,11 @@ find files of those names at the top level of this repository. **/
 #include "LidarData.h"
 #include "SurfacePoint.h"
 
+#include "XmlStackedHandler.h"
+
 class QDataStream;
 class QUuid;
 class QXmlStreamWriter;
-class QXmlStreamReader;
 
 namespace Isis {
   class BundleResults;
@@ -30,6 +31,7 @@ namespace Isis {
   class ImageList;
   class Project;  //TODO does xml stuff need project???
   class PvlObject;
+  class XmlStackedHandlerReader;
 
   /**
    * @brief Container class for BundleAdjustment results.
@@ -172,9 +174,8 @@ namespace Isis {
                     QList<ImageList *> imgList,
                     QObject *parent = 0);
       BundleSolutionInfo(Project *project,
-                         QXmlStreamReader *xmlReader,
-                         QObject *parent = 0);
-      void readBundleSolutionInfo(QXmlStreamReader *xmlReader);
+                    XmlStackedHandlerReader *xmlReader,
+                    QObject *parent = 0);  //TODO does xml stuff need project???
       BundleSolutionInfo() = default;
 
       ~BundleSolutionInfo();
@@ -222,6 +223,39 @@ namespace Isis {
       void updateFileName(Project *);
 
     private:
+      /**
+       * This class is used to read an images.xml file into an image list
+       *
+       * @see QXmlDefaultHandler documentation
+       * @author 2014-07-21 Ken Edmundson
+       *
+       * @internal
+       *   @history 2016-06-13 Makayla Shepherd - Added updateFileName() and updated documentation.
+       *                           Fixes #2298.
+       */
+      class XmlHandler : public XmlStackedHandler {
+        public:
+          //TODO does xml stuff need project???
+          XmlHandler(BundleSolutionInfo *bundleSolutionInfo, Project *project);
+          ~XmlHandler();
+
+          virtual bool startElement(const QString &namespaceURI, const QString &localName,
+                                    const QString &qName, const QXmlAttributes &atts);
+          virtual bool characters(const QString &ch);
+          virtual bool endElement(const QString &namespaceURI, const QString &localName,
+                                    const QString &qName);
+          QString surfacePointCoordName(SurfacePoint::CoordinateType type,
+                                        SurfacePoint::CoordIndex coordIdx) const;
+
+        private:
+          Q_DISABLE_COPY(XmlHandler);
+
+          BundleSolutionInfo *m_xmlHandlerBundleSolutionInfo; //!< The bundleSolutionInfo object
+          Project *m_xmlHandlerProject;  //TODO does xml stuff need project???
+          QString m_xmlHandlerCharacters; //!< List of characters that have been handled
+      };
+
+    private:
 
       //! A unique ID for this BundleSolutionInfo object (useful for others to reference this
       //! object when saving to disk).
@@ -244,10 +278,6 @@ namespace Isis {
       QString m_csvSavedImagesFilename;
       QString m_csvSavedPointsFilename;
       QString m_csvSavedResidualsFilename;
-
-      // BundleSolutionInfo *m_xmlHandlerBundleSolutionInfo; //!< The bundleSolutionInfo object
-      Project *m_xmlHandlerProject;                       // TODO does xml stuff need project???
-      QString m_xmlHandlerCharacters;                     //!< List of characters that have been handled
 
   }; // end BundleSolutionInfo class
 

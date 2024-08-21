@@ -43,11 +43,6 @@ namespace Isis {
       else {
         parameters += toString(numberOfLines);
       }
-
-      if(ui.GetParamPreference() != "") { 
-        parameters += " -PREF=" + ui.GetParamPreference();
-      }
-
       ProgramLauncher::RunIsisProgram("crop", parameters);
       //The starting line for next crop
       startLine = 1 + cropNum * (numberOfLines - lineOverlap);

@@ -80,7 +80,6 @@ Group = CoreType
   OutputName     = CoreType
   OutputPosition = (Group, Pixels)
   Translation    = (Real, IEEE754LSBSingle)
-  Translation    = (UnsignedWord, UnsignedLSB2)
 End_Group
 
 Group = CoreByteOrder
@@ -93,7 +92,6 @@ Group = CoreByteOrder
   OutputPosition = (Group, Pixels)
   Translation    = (Lsb, IEEE754LSBSingle)
   Translation    = (Lsb, SignedLSB2)
-  Translation    = (Lsb, UnsignedLSB2)
 End_Group
 
 Group = CoreBase

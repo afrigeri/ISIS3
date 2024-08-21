@@ -77,7 +77,6 @@ namespace Isis{
 
     //SET PROGRESS TEXT, VALID MAXIMUM PIXEL VALUE, AND CREATE STRETCH IF NEEDED
     if(dataConversionType != "Table") {   //Conversion Type is 12Bit or 8LSB, only save off overclocked pixels
-      validMax = 255;
       if(dataConversionType == "12Bit") {
         p.Progress()->SetText("Image was 12 bit. No conversion needed. \nSaving line prefix data...");
       }
@@ -86,7 +85,6 @@ namespace Isis{
       }
     }
     else {  //if ConversionType == Table, Use LUT to create stretch pairs for conversion
-      validMax = 4095;
       CreateStretchPairs();
       // Pvl outputLabels;
       Pvl *outputLabel = ocube->label();
@@ -96,14 +94,6 @@ namespace Isis{
       inst.findKeyword("BiasStripMean").setValue(toString(stretch.Map(biasStripMean)));
       inst.findKeyword("BiasStripMean").addComment("BiasStripMean value converted back to 12 bit.");
       p.Progress()->SetText("Image was converted using 12-to-8 bit table. \nConverting prefix pixels back to 12 bit and saving line prefix data...");
-    }
-
-    Pvl inputLabel(in.expanded());
-    if (inputLabel.hasKeyword("VALID_MAXIMUM")) {
-      PvlKeyword labelValidMax = inputLabel.findKeyword("VALID_MAXIMUM");
-      if (labelValidMax[1] != "UNK") {
-        validMax = toInt(labelValidMax[1]);
-      }
     }
 
     p.StartProcess();
@@ -219,7 +209,7 @@ namespace Isis{
       stretchPairs->GetLine(line);  //assigns value to line
       line = line.simplified();
 
-      foreach (QString value, line.split(QRegExp("[\\s,]"), Qt::SkipEmptyParts)) {
+      foreach (QString value, line.split(QRegExp("[\\s,]"), QString::SkipEmptyParts)) {
         stretch.AddPair(temp1, toDouble(value));
         temp1++;
       }
@@ -304,6 +294,7 @@ namespace Isis{
 
     //  initialize global variables
     dataConversionType = (QString) inst.findKeyword("DataConversionType");
+    validMax = inputLabel.findKeyword("ValidMaximum")[1].toInt();
     sumMode = inst.findKeyword("SummingMode");
     compressionType = (QString) inst.findKeyword("CompressionType");
     IString fsw((QString) inst.findKeyword("FlightSoftwareVersionId"));

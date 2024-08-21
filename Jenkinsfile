@@ -12,9 +12,6 @@ pipeline {
                 args '--entrypoint= -v /astro_efs:/astro_efs'
                }
     }
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-    }
     environment {
         ISISDATA        =   '/astro_efs/isis_data'
         ISISTESTDATA    =   '/astro_efs/isis_testData'
@@ -34,8 +31,10 @@ pipeline {
                 conda activate isis > /dev/null
                 conda config --env --set channel_priority flexible
                 conda install -c conda-forge python=3 findutils
-                conda env update -f environment.yml --prune
+                mamba env update -f environment.yml --prune
                 conda activate isis
+                mamba install -c conda-forge git
+                git submodule update --init --recursive
                 conda list
                 '''
             }
@@ -49,7 +48,7 @@ pipeline {
                 cd build
                 cmake -GNinja -DJP2KFLAG=ON  \
                       -DKAKADU_INCLUDE_DIR=${KAKADU_HEADERS} \
-                      -Dpybindings=ON \
+                      -Dpybindings=OFF \
                       -DCMAKE_BUILD_TYPE=RELEASE \
                       -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
                       ../isis
@@ -118,8 +117,6 @@ pipeline {
                     cd $WORKSPACE/isis/pytests 
                     pytest .
 
-                    cd $WORKSPACE/isis/python_bindings/tests  
-                    pytest .
                     '''
                 }
             }

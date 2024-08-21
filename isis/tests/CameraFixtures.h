@@ -131,23 +131,11 @@ namespace Isis {
       void setInstrument(QString ikid, QString instrumentId, QString spacecraftName);
   };
 
-  class OsirisRexOcamsCube : public DefaultCube {
+
+  class OsirisRexCube : public DefaultCube {
     protected:
       void setInstrument(QString ikid, QString instrumentId);
   };
-
-
-  class OsirisRexTagcamsNAVCamCube : public DefaultCube {
-    protected:
-      void setInstrument(QString ikid, QString instrumentId);
-  };
-
-
-  class OsirisRexTagcamsNFTCamCube : public DefaultCube {
-    protected:
-      void setInstrument(QString ikid, QString instrumentId);
-  };
-
 
   class ClipperWacFcCube : public DefaultCube {
     protected:

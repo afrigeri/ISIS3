@@ -137,7 +137,7 @@ namespace Isis {
        * @internal
        */
       class OriginalFileToProjectCubeFunctor :
-          public std::function<Cube *(const FileName &)> {
+          public std::unary_function<const FileName &, Cube *> {
         public:
           OriginalFileToProjectCubeFunctor(QThread *guiThread,
                                            QDir destinationFolder, bool copyDnData);

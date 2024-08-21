@@ -52,7 +52,7 @@ namespace Isis {
 
   void tgocassisstitch(UserInterface &ui) {
 
-    QMultiMap<QString, FileName> frameMap;
+    QMap<QString, FileName> frameMap;
 
     try {
       // Open up the list of framelet files
@@ -66,34 +66,18 @@ namespace Isis {
       throw IException(e, IException::Unknown, msg, _FILEINFO_);
     }
 
-    // read the optional cubename
-    FileName frameletCubeFlag(ui.GetCubeName("CUBENAME"));
-    QString frameletCubeName = frameletCubeFlag.expanded();
-
     // Stitch together the individual frames
-    FileName outputPrefix(ui.GetCubeName("OUTPUTPREFIX"));
-    FileName outputSuffix(ui.GetCubeName("OUTPUTSUFFIX"));
-    QString outputPrefBaseName = outputPrefix.expanded();
-    QString outputSuffBaseName = outputSuffix.expanded();
+    FileName outputFileName(ui.GetCubeName("OUTPUTPREFIX"));
+    QString outputBaseName = outputFileName.expanded();
     QStringList frameKeys = frameMap.uniqueKeys();
     Progress stitchProgress;
     stitchProgress.SetText("Stitching Frames");
     stitchProgress.SetMaximumSteps(frameKeys.size());
     stitchProgress.CheckStatus();
-    
     foreach(QString frameKey, frameKeys) {
       try {
         QString frameIdentifier = frameKey.split("/").last();
-        FileName frameFileName;
-        if (frameletCubeName != "") {
-          frameFileName = FileName(outputPrefBaseName + "-" +
-                               frameletCubeName +
-                               outputSuffBaseName + ".cub");
-        } else {
-          frameFileName = FileName(outputPrefBaseName + "-" +
-                                 frameIdentifier +
-                                 outputSuffBaseName + ".cub");
-        }
+        FileName frameFileName(outputBaseName + "-" + frameIdentifier + ".cub");
         stitchFrame( frameMap.values(frameKey), frameFileName );
         stitchProgress.CheckStatus();
       }
@@ -119,16 +103,16 @@ namespace Isis {
    *                                   files in that frame.
    */
   QMap<QString, FileName> sortFramelets(FileName frameletListFile) {
-    QMultiMap<QString, FileName> frameMap;
+    QMap<QString, FileName> frameMap;
 
     ObservationNumberList frameletList(frameletListFile.expanded(), false);
 
     for (int i = 0; i < frameletList.size(); i++) {
-      frameMap.insert( frameletList.observationNumber(i),
+      frameMap.insertMulti( frameletList.observationNumber(i),
                             frameletList.fileName(i) );
     }
 
-    return std::move(frameMap);
+    return frameMap;
   }
 
 

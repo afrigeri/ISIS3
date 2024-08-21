@@ -16,15 +16,14 @@ find files of those names at the top level of this repository. **/
 #include <QMetaType>
 #include <QPointer>
 #include <QUndoCommand>
-#include <QXmlStreamReader>
 
-#include <QElapsedTimer>
 
 
 #include "CorrelationMatrix.h"
 #include "FileItem.h"
 #include "GuiCamera.h"
 #include "TargetBody.h"
+#include "XmlStackedHandler.h"
 
 template<typename T> class QFutureWatcher;
 class QMutex;
@@ -40,6 +39,7 @@ namespace Isis {
   class ProjectItem;
   class ShapeList;
   class Template;
+  class XmlStackedHandlerReader;
 
   /**
    * @brief Provide Undo/redo abilities, serialization, and history for an operation.
@@ -357,6 +357,7 @@ namespace Isis {
       virtual bool isExecutable(FileItemQsp fileItem);
       virtual bool isExecutable(ProjectItem *item);
 
+      void read(XmlStackedHandlerReader *xmlReader);
       void save(QXmlStreamWriter &stream) const;
 
       virtual void setData(Context);
@@ -483,6 +484,31 @@ namespace Isis {
         NoQueuedAction,
         RedoQueuedAction,
         UndoQueuedAction
+      };
+
+      /**
+       * @brief This class is used for processing an XML file containing information
+       * about a WorkOrder.
+       *
+       * @author 2012-??-?? Steven Lambright
+       *
+       * @internal
+       */
+      class XmlHandler : public XmlStackedHandler {
+        public:
+          XmlHandler(WorkOrder *workOrder);
+
+          virtual bool startElement(const QString &namespaceURI, const QString &localName,
+                                    const QString &qName, const QXmlAttributes &atts);
+
+        private:
+          Q_DISABLE_COPY(XmlHandler);
+
+          /**
+           * @brief This is a pointer to the WorkOrder the XmlHandler is filling
+           * with information it parses from an XML file.
+           */
+          WorkOrder *m_workOrder;
       };
 
     protected:
@@ -646,9 +672,9 @@ namespace Isis {
 
 
       /**
-       * A QElapsedTimer object holding the excecution time of the WorkOrder.
+       * A QTime object holding the excecution time of the WorkOrder.
        */
-      QElapsedTimer *m_elapsedTimer;
+      QTime *m_elapsedTimer;
 
       /**
        * @brief The seconds that have elapsed since the WorkOrder started executing.

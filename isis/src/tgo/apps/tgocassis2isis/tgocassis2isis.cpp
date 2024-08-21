@@ -10,7 +10,6 @@ find files of those names at the top level of this repository. **/
 
 #include <QString>
 #include <QtMath>
-#include <QFile>
 
 #include "AlphaCube.h"
 #include "Cube.h"
@@ -37,16 +36,6 @@ namespace Isis {
   void tgocassis2isis(UserInterface &ui) {
     FileName xmlFileName = ui.GetFileName("FROM");
 
-    if (!xmlFileName.removeExtension().addExtension("dat").fileExists() && !xmlFileName.removeExtension().addExtension("img").fileExists()) {
-        QString msg = "Cannot find image file for [" + xmlFileName.name() + "]. Confirm that the "
-        ".dat or .img file for this XML exists and is located in the same directory.";
-      throw IException(IException::User, msg, _FILEINFO_);
-    }
-    if(xmlFileName.name().contains("cas_raw_sc")){
-        QString msg = "tgocassis2isis is unable to process cas_raw_sc data. Please use cas_cal_sc data instead.";
-      throw IException(IException::User, msg, _FILEINFO_);
-    }
-
     try {
       ProcessImport importer;
       translateCoreInfo(xmlFileName, importer);
@@ -70,16 +59,11 @@ namespace Isis {
       QFile xmlFile(xmlFileName.expanded());
       QDomDocument xmlDoc;
       xmlDoc.setContent(&xmlFile, true);
-      // If any instances of "Optical_Filter" or "Mission_Area" exist, use PSA .trn file
+      // If any instances of "Optical_Filter" exist, use PSA .trn file
       QString transExportFile;
-      if (!xmlDoc.elementsByTagName("Optical_Filter").isEmpty() &&
-          !xmlDoc.elementsByTagName("Cassis_Data").isEmpty()) {
-        transExportFile = "TgoCassisExportedInstrument_PSA_Optical_Filter.trn";
-      }
-      else if (!xmlDoc.elementsByTagName("Cassis_Data").isEmpty()) {
+      if (xmlDoc.elementsByTagName("Optical_Filter").size()){
         transExportFile = "TgoCassisExportedInstrument_PSA.trn";
-      }
-      else {
+      } else {
         transExportFile = "TgoCassisExportedInstrument.trn";
       }
       // first assume lev1b image

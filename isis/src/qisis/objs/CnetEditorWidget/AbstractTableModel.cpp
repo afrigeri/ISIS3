@@ -370,7 +370,7 @@ namespace Isis {
             (int)((a * numItems) * (log2(b * numItems))));
 
         try {
-          std::stable_sort(itemsToSort.begin(), itemsToSort.end(),
+          qStableSort(itemsToSort.begin(), itemsToSort.end(),
               *m_lessThanFunctor);
         }
         catch (SortingCanceledException &e) {

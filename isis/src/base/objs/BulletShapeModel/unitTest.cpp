@@ -222,10 +222,10 @@ void outputModelStatus(BulletShapeModel &bulletModel) {
              << intersection->GetY().kilometers() << ", "
              << intersection->GetZ().kilometers() << ")";
   }
-  qDebug() << "Model has normal? " << bulletModel.hasLocalNormal();
+  qDebug() << "Model has normal? " << bulletModel.hasNormal();
   std::vector<double> normal;
-  if ( bulletModel.hasLocalNormal() ) {
-    normal = bulletModel.localNormal();
+  if ( bulletModel.hasNormal() ) {
+    normal = bulletModel.normal();
     qDebug() << "  Local Normal: ("
              << normal[0] << ", "
              << normal[1] << ", "
@@ -238,7 +238,7 @@ void outputModelStatus(BulletShapeModel &bulletModel) {
                << normal[1] << ", "
                << normal[2] << ")";
       bulletModel.setLocalNormalFromIntercept();
-      normal = bulletModel.localNormal();
+      normal = bulletModel.normal();
       qDebug() << "  Recalculated Local Normal: ("
                << normal[0] << ", "
                << normal[1] << ", "

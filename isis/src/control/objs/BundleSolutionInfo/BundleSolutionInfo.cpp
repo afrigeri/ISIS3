@@ -16,7 +16,6 @@ find files of those names at the top level of this repository. **/
 #include <QStringList>
 #include <QUuid>
 #include <QXmlStreamWriter>
-#include <QXmlStreamReader>
 
 #include "BundleLidarRangeConstraint.h"
 #include "BundleResults.h"
@@ -34,6 +33,7 @@ find files of those names at the top level of this repository. **/
 #include "PvlObject.h"
 #include "StatCumProbDistDynCalc.h"
 #include "Statistics.h"
+#include "XmlStackedHandlerReader.h"
 
 namespace Isis {
 
@@ -95,25 +95,22 @@ namespace Isis {
 
 
   /**
-   * Handle an XML start element. This expects <image/> and <displayProperties/> elements.
+   * Constructor. Creates a BundleSolutionInfo from disk.
    *
-   * @param namespaceURI ???
-   * @param localName The keyword name given to the member variable in the XML.
-   * @param qName ???
-   * @param atts The attribute containing the keyword value for the given local name.
-   *
-   * @return @b bool True if we should continue reading the XML.
+   * @param project The current project
+   * @param xmlReader An XML reader that's up to an <bundleSettings/> tag.
+   * @param parent The Qt-relationship parent
    */
   BundleSolutionInfo::BundleSolutionInfo(Project *project,
-                                         QXmlStreamReader *xmlReader,
-                                         QObject *parent) : QObject(parent)
-  {
+                                         XmlStackedHandlerReader *xmlReader,
+                                         QObject *parent) : QObject(parent) {
+                                         //TODO does xml stuff need project???
     m_id = new QUuid(QUuid::createUuid());
     m_runTime = "";
     m_name = m_runTime;
     m_inputControlNetFileName = NULL;
     m_outputControl = NULL;
-    m_outputControlName = "";
+    m_outputControlName="";
     m_inputLidarDataFileName = NULL;
     m_outputLidarDataSet = NULL;
     m_statisticsResults = NULL;
@@ -121,69 +118,10 @@ namespace Isis {
     m_images = new QList<ImageList *>;
     m_adjustedImages = new QList<ImageList *>;
 
-    m_xmlHandlerProject = project;
-    m_xmlHandlerCharacters = "";
-
-    readBundleSolutionInfo(xmlReader);
+    xmlReader->setErrorHandler(new XmlHandler(this, project));
+    xmlReader->pushContentHandler(new XmlHandler(this, project));
   }
 
-  void BundleSolutionInfo::readBundleSolutionInfo(QXmlStreamReader *xmlReader) {
-    QString projectRoot;
-    if (m_xmlHandlerProject) {
-      projectRoot = m_xmlHandlerProject->projectRoot() + "/";
-    }
-    if (!m_adjustedImages){
-      m_adjustedImages = new QList<ImageList *>;
-    }
-    Q_ASSERT(xmlReader->name() == "bundleSolutionInfo");
-    while(xmlReader->readNextStartElement()) {
-      if (xmlReader->qualifiedName() == "generalAttributes") {
-        while (xmlReader->readNextStartElement()) {
-          if (xmlReader->qualifiedName() == "id") {
-            m_id = new QUuid(xmlReader->readElementText());
-          }
-          else if (xmlReader->qualifiedName() == "name") {
-            m_name = xmlReader->readElementText();
-          }
-          else if (xmlReader->qualifiedName() == "runTime") {
-            m_runTime = xmlReader->readElementText();
-          }
-          else if (xmlReader->qualifiedName() == "inputFileName") {
-            m_inputControlNetFileName = new FileName(projectRoot + xmlReader->readElementText());
-          }
-          else if (xmlReader->qualifiedName() == "bundleOutTXT") {
-            m_txtBundleOutputFilename = projectRoot + xmlReader->readElementText();
-          }
-          else if (xmlReader->qualifiedName() == "imagesCSV") {
-            m_csvSavedImagesFilename = projectRoot + xmlReader->readElementText();
-          }
-          else if (xmlReader->qualifiedName() == "pointsCSV") {
-            m_csvSavedPointsFilename = projectRoot + xmlReader->readElementText();
-          }
-          else if (xmlReader->qualifiedName() == "residualsCSV") {
-            m_csvSavedResidualsFilename = projectRoot + xmlReader->readElementText();
-          }
-          else {
-            xmlReader->skipCurrentElement();
-          }
-        }
-      }
-      else if (xmlReader->name() == "bundleSettings") {
-        m_settings = NULL;
-        BundleSettings *settings = new BundleSettings();
-        settings->readBundleSettings(xmlReader);
-        m_settings = BundleSettingsQsp(settings);
-      }
-      else if (xmlReader->name() == "bundleResults") {
-        m_statisticsResults = NULL;
-        m_statisticsResults = new BundleResults();
-        m_statisticsResults->readBundleResults(xmlReader);
-      }
-      else {
-        xmlReader->skipCurrentElement();
-      }
-    }  
-  }
 
   /**
    * Destructor
@@ -540,10 +478,10 @@ namespace Isis {
     int ncolumns = outputColumns.size();
     for (int i = 0; i < ncolumns; i++) {
       QString str = outputColumns.at(i);
-      snprintf(buf, sizeof(buf), "%s", (const char*)str.toLatin1().data());
+      sprintf(buf, "%s", (const char*)str.toLatin1().data());
       fpOut << buf;
     }
-    snprintf(buf, sizeof(buf), "\n");
+    sprintf(buf, "\n");
     fpOut << buf;
 
     outputColumns.clear();
@@ -565,10 +503,10 @@ namespace Isis {
     ncolumns = outputColumns.size();
     for (int i = 0; i < ncolumns; i++) {
       QString str = outputColumns.at(i);
-      snprintf(buf, sizeof(buf), "%s", (const char*)str.toLatin1().data());
+      sprintf(buf, "%s", (const char*)str.toLatin1().data());
       fpOut << buf;
     }
-    snprintf(buf, sizeof(buf), "\n");
+    sprintf(buf, "\n");
     fpOut << buf;
 
     return true;
@@ -615,142 +553,142 @@ namespace Isis {
 
     int convergenceCriteria = 1;
 
-    snprintf(buf, sizeof(buf), "JIGSAW: BUNDLE ADJUSTMENT\n=========================\n");
+    sprintf(buf, "JIGSAW: BUNDLE ADJUSTMENT\n=========================\n");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                       Run Time: %s",
+    sprintf(buf, "\n                       Run Time: %s",
                   Isis::iTime::CurrentLocalTime().toLatin1().data());
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                       Network Filename: %s",
+    sprintf(buf, "\n                       Network Filename: %s",
                   m_inputControlNetFileName->expanded().toLatin1().data());
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf),"\n                       Cube List: %s",
+    sprintf(buf,"\n                       Cube List: %s",
                 m_settings->cubeList().toStdString().c_str() );
 
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n                       Output Network Filename: %s",
+    sprintf(buf, "\n                       Output Network Filename: %s",
                               outputControlName().toStdString().c_str() );
     fpOut << buf;
-    snprintf(buf, sizeof(buf),"\n                       Output File Prefix: %s",
+    sprintf(buf,"\n                       Output File Prefix: %s",
                 m_settings->outputFilePrefix().toStdString().c_str() );
     fpOut <<buf;
 
-    snprintf(buf, sizeof(buf), "\n                       Network Id: %s",
+    sprintf(buf, "\n                       Network Id: %s",
                   m_statisticsResults->outputControlNet()->GetNetworkId().toLatin1().data());
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                       Network Description: %s",\
+    sprintf(buf, "\n                       Network Description: %s",\
                   m_statisticsResults->outputControlNet()->Description().toLatin1().data());
     fpOut << buf;
     if (m_inputLidarDataFileName) {
-      snprintf(buf, sizeof(buf), "\n            Lidar Data Filename: %s",
+      sprintf(buf, "\n            Lidar Data Filename: %s",
                     m_inputLidarDataFileName->expanded().toLatin1().data());
       fpOut << buf;
     }
-    snprintf(buf, sizeof(buf), "\n                       Target: %s",
+    sprintf(buf, "\n                       Target: %s",
                   m_statisticsResults->outputControlNet()->GetTarget().toLatin1().data());
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n\n                       Linear Units: kilometers");
+    sprintf(buf, "\n\n                       Linear Units: kilometers");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                       Angular Units: decimal degrees");
+    sprintf(buf, "\n                       Angular Units: decimal degrees");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n\nINPUT: SOLVE OPTIONS\n====================\n");
+    sprintf(buf, "\n\nINPUT: SOLVE OPTIONS\n====================\n");
     fpOut << buf;
 
     m_settings->solveObservationMode() ?
-      snprintf(buf, sizeof(buf), "\n                   OBSERVATIONS: ON"):
-      snprintf(buf, sizeof(buf), "\n                   OBSERVATIONS: OFF");
+      sprintf(buf, "\n                   OBSERVATIONS: ON"):
+      sprintf(buf, "\n                   OBSERVATIONS: OFF");
     fpOut << buf;
 
     m_settings->solveRadius() ?
-      snprintf(buf, sizeof(buf), "\n                         RADIUS: ON"):
-      snprintf(buf, sizeof(buf), "\n                         RADIUS: OFF");
+      sprintf(buf, "\n                         RADIUS: ON"):
+      sprintf(buf, "\n                         RADIUS: OFF");
     fpOut << buf;
 
     m_settings->solveTargetBody() ?
-      snprintf(buf, sizeof(buf), "\n                    TARGET BODY: ON"):
-      snprintf(buf, sizeof(buf), "\n                    TARGET BODY: OFF");
+      sprintf(buf, "\n                    TARGET BODY: ON"):
+      sprintf(buf, "\n                    TARGET BODY: OFF");
     fpOut << buf;
 
     m_settings->updateCubeLabel() ?
-      snprintf(buf, sizeof(buf), "\n                         UPDATE: YES"):
-      snprintf(buf, sizeof(buf), "\n                         UPDATE: NO");
+      sprintf(buf, "\n                         UPDATE: YES"):
+      sprintf(buf, "\n                         UPDATE: NO");
     fpOut << buf;
 
     m_settings->errorPropagation() ?
-      snprintf(buf, sizeof(buf), "\n              ERROR PROPAGATION: ON"):
-      snprintf(buf, sizeof(buf), "\n              ERROR PROPAGATION: OFF");
+      sprintf(buf, "\n              ERROR PROPAGATION: ON"):
+      sprintf(buf, "\n              ERROR PROPAGATION: OFF");
     fpOut << buf;
 
     (m_settings->controlPointCoordTypeReports() == SurfacePoint::Latitudinal) ?
-      snprintf(buf, sizeof(buf), "\n  CONTROL POINT COORDINATE TYPE FOR REPORTS: LATITUDINAL"):
-      snprintf(buf, sizeof(buf), "\n  CONTROL POINT COORDINATE TYPE FOR REPORTS: RECTANGULAR");
+      sprintf(buf, "\n  CONTROL POINT COORDINATE TYPE FOR REPORTS: LATITUDINAL"):
+      sprintf(buf, "\n  CONTROL POINT COORDINATE TYPE FOR REPORTS: RECTANGULAR");
     fpOut << buf;
 
     (m_settings->controlPointCoordTypeBundle() == SurfacePoint::Latitudinal) ?
-      snprintf(buf, sizeof(buf), "\n  CONTROL POINT COORDINATE TYPE FOR BUNDLE: LATITUDINAL"):
-      snprintf(buf, sizeof(buf), "\n  CONTROL POINT COORDINATE TYPE FOR BUNDLE: RECTANGULAR");
+      sprintf(buf, "\n  CONTROL POINT COORDINATE TYPE FOR BUNDLE: LATITUDINAL"):
+      sprintf(buf, "\n  CONTROL POINT COORDINATE TYPE FOR BUNDLE: RECTANGULAR");
     fpOut << buf;
 
     if (m_settings->outlierRejection()) {
-      snprintf(buf, sizeof(buf), "\n              OUTLIER REJECTION: ON");
+      sprintf(buf, "\n              OUTLIER REJECTION: ON");
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "\n           REJECTION MULTIPLIER: %lf",
+      sprintf(buf, "\n           REJECTION MULTIPLIER: %lf",
                     m_settings->outlierRejectionMultiplier());
       fpOut << buf;
 
     }
     else {
-      snprintf(buf, sizeof(buf), "\n              OUTLIER REJECTION: OFF");
+      sprintf(buf, "\n              OUTLIER REJECTION: OFF");
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "\n           REJECTION MULTIPLIER: N/A");
+      sprintf(buf, "\n           REJECTION MULTIPLIER: N/A");
       fpOut << buf;
     }
 
     // Added April 5, 2017
-    snprintf(buf, sizeof(buf), "\n              CONTROL POINT COORDINATE TYPE FOR REPORTS:  %s",
+    sprintf(buf, "\n              CONTROL POINT COORDINATE TYPE FOR REPORTS:  %s",
        SurfacePoint::coordinateTypeToString(m_settings->controlPointCoordTypeReports()).toLatin1().data());
 
     // Added July 4, 2017
-    snprintf(buf, sizeof(buf), "\n              CONTROL POINT COORDINATE TYPE FOR BUNDLE:  %s",
+    sprintf(buf, "\n              CONTROL POINT COORDINATE TYPE FOR BUNDLE:  %s",
        SurfacePoint::coordinateTypeToString(m_settings->controlPointCoordTypeBundle()).toLatin1().data());
 
-    snprintf(buf, sizeof(buf), "\n\nMAXIMUM LIKELIHOOD ESTIMATION\n============================\n");
+    sprintf(buf, "\n\nMAXIMUM LIKELIHOOD ESTIMATION\n============================\n");
     fpOut << buf;
 
     for (int tier = 0; tier < 3; tier++) {
       if (tier < m_statisticsResults->numberMaximumLikelihoodModels()) {
-        snprintf(buf, sizeof(buf), "\n                         Tier %d Enabled: TRUE", tier);
+        sprintf(buf, "\n                         Tier %d Enabled: TRUE", tier);
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n               Maximum Likelihood Model: %s",
+        sprintf(buf, "\n               Maximum Likelihood Model: %s",
                       MaximumLikelihoodWFunctions::modelToString(
                           m_statisticsResults->
                               maximumLikelihoodModelWFunc(tier).model()).toLatin1().data());
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n    Quantile used for tweaking constant: %lf",
+        sprintf(buf, "\n    Quantile used for tweaking constant: %lf",
                       m_statisticsResults->maximumLikelihoodModelQuantile(tier));
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n   Quantile weighted R^2 Residual value: %lf",
+        sprintf(buf, "\n   Quantile weighted R^2 Residual value: %lf",
                       m_statisticsResults->maximumLikelihoodModelWFunc(tier).tweakingConstant());
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n       Approx. weighted Residual cutoff: %s",
+        sprintf(buf, "\n       Approx. weighted Residual cutoff: %s",
                       m_statisticsResults->maximumLikelihoodModelWFunc(tier)
                           .weightedResidualCutoff().toLatin1().data());
         fpOut << buf;
         if (tier != 2) fpOut << "\n";
       }
       else {
-        snprintf(buf, sizeof(buf), "\n                         Tier %d Enabled: FALSE", tier);
+        sprintf(buf, "\n                         Tier %d Enabled: FALSE", tier);
         fpOut << buf;
       }
     }
 
-    snprintf(buf, sizeof(buf), "\n\nINPUT: CONVERGENCE CRITERIA\n===========================\n");
+    sprintf(buf, "\n\nINPUT: CONVERGENCE CRITERIA\n===========================\n");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                         SIGMA0: %e",
+    sprintf(buf, "\n                         SIGMA0: %e",
                   m_settings->convergenceCriteriaThreshold());
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n             MAXIMUM ITERATIONS: %d",
+    sprintf(buf, "\n             MAXIMUM ITERATIONS: %d",
                   m_settings->convergenceCriteriaMaximumIterations());
     fpOut << buf;
 
@@ -765,23 +703,23 @@ namespace Isis {
     int positionSolveDegree = globalSettings.numberCameraPositionCoefficientsSolved();
     QList<double> positionSigmas = globalSettings.aprioriPositionSigmas();
 
-    snprintf(buf, sizeof(buf), "\n\nINPUT: CAMERA POINTING OPTIONS\n==============================\n");
+    sprintf(buf, "\n\nINPUT: CAMERA POINTING OPTIONS\n==============================\n");
     fpOut << buf;
     switch (pointingSolveDegree) {
       case 0:
-        snprintf(buf, sizeof(buf),"\n                          CAMSOLVE: NONE");
+        sprintf(buf,"\n                          CAMSOLVE: NONE");
         break;
       case 1:
-        snprintf(buf, sizeof(buf),"\n                          CAMSOLVE: ANGLES");
+        sprintf(buf,"\n                          CAMSOLVE: ANGLES");
         break;
       case 2:
-        snprintf(buf, sizeof(buf),"\n                          CAMSOLVE: ANGLES, VELOCITIES");
+        sprintf(buf,"\n                          CAMSOLVE: ANGLES, VELOCITIES");
         break;
       case 3:
-        snprintf(buf, sizeof(buf),"\n                          CAMSOLVE: ANGLES, VELOCITIES, ACCELERATIONS");
+        sprintf(buf,"\n                          CAMSOLVE: ANGLES, VELOCITIES, ACCELERATIONS");
         break;
       default:
-        snprintf(buf, sizeof(buf),"\n                          CAMSOLVE: ALL POLYNOMIAL COEFFICIENTS (%d)"
+        sprintf(buf,"\n                          CAMSOLVE: ALL POLYNOMIAL COEFFICIENTS (%d)"
                     "\n                          CKDEGREE: %d"
                     "\n                     CKSOLVEDEGREE: %d",
                 pointingSolveDegree,
@@ -791,31 +729,31 @@ namespace Isis {
     }
     fpOut << buf;
     globalSettings.solveTwist() ?
-        snprintf(buf, sizeof(buf), "\n                             TWIST: ON"):
-        snprintf(buf, sizeof(buf), "\n                             TWIST: OFF");
+        sprintf(buf, "\n                             TWIST: ON"):
+        sprintf(buf, "\n                             TWIST: OFF");
     fpOut << buf;
     globalSettings.solvePolyOverPointing() ?
-        snprintf(buf, sizeof(buf), "\n POLYNOMIAL OVER EXISTING POINTING: ON"):
-        snprintf(buf, sizeof(buf), "\nPOLYNOMIAL OVER EXISTING POINTING : OFF");
+        sprintf(buf, "\n POLYNOMIAL OVER EXISTING POINTING: ON"):
+        sprintf(buf, "\nPOLYNOMIAL OVER EXISTING POINTING : OFF");
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n\nINPUT: SPACECRAFT OPTIONS\n=========================\n");
+    sprintf(buf, "\n\nINPUT: SPACECRAFT OPTIONS\n=========================\n");
     fpOut << buf;
     switch (positionSolveDegree) {
       case 0:
-        snprintf(buf, sizeof(buf),"\n                        SPSOLVE: NONE");
+        sprintf(buf,"\n                        SPSOLVE: NONE");
         break;
       case 1:
-        snprintf(buf, sizeof(buf),"\n                        SPSOLVE: POSITION");
+        sprintf(buf,"\n                        SPSOLVE: POSITION");
         break;
       case 2:
-        snprintf(buf, sizeof(buf),"\n                        SPSOLVE: POSITION, VELOCITIES");
+        sprintf(buf,"\n                        SPSOLVE: POSITION, VELOCITIES");
         break;
       case 3:
-        snprintf(buf, sizeof(buf),"\n                        SPSOLVE: POSITION, VELOCITIES, ACCELERATIONS");
+        sprintf(buf,"\n                        SPSOLVE: POSITION, VELOCITIES, ACCELERATIONS");
         break;
       default:
-        snprintf(buf, sizeof(buf),"\n                        SPSOLVE: ALL POLYNOMIAL COEFFICIENTS (%d)"
+        sprintf(buf,"\n                        SPSOLVE: ALL POLYNOMIAL COEFFICIENTS (%d)"
                     "\n                      SPKDEGREE: %d"
                     "\n                 SPKSOLVEDEGREE: %d",
                 positionSolveDegree,
@@ -825,11 +763,11 @@ namespace Isis {
     }
     fpOut << buf;
     globalSettings.solvePositionOverHermite() ?
-        snprintf(buf, sizeof(buf), "\n POLYNOMIAL OVER HERMITE SPLINE: ON"):
-        snprintf(buf, sizeof(buf), "\nPOLYNOMIAL OVER HERMITE SPLINE : OFF");
+        sprintf(buf, "\n POLYNOMIAL OVER HERMITE SPLINE: ON"):
+        sprintf(buf, "\nPOLYNOMIAL OVER HERMITE SPLINE : OFF");
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n\nINPUT: GLOBAL IMAGE PARAMETER UNCERTAINTIES\n===========================================\n");
+    sprintf(buf, "\n\nINPUT: GLOBAL IMAGE PARAMETER UNCERTAINTIES\n===========================================\n");
     QString coord1Str;
     QString coord2Str;
     QString coord3Str;
@@ -854,204 +792,204 @@ namespace Isis {
     // Coordinate 1 (latitude or point X)
     fpOut << buf;
     (m_settings->globalPointCoord1AprioriSigma()  == Isis::Null) ?
-      snprintf(buf, sizeof(buf),"\n               POINT %s SIGMA: N/A", coord1Str.toLatin1().data()):
-      snprintf(buf, sizeof(buf),"\n               POINT %s SIGMA: %lf (meters)", coord1Str.toLatin1().data(),
+      sprintf(buf,"\n               POINT %s SIGMA: N/A", coord1Str.toLatin1().data()):
+      sprintf(buf,"\n               POINT %s SIGMA: %lf (meters)", coord1Str.toLatin1().data(),
               m_settings->globalPointCoord1AprioriSigma());
     // Coordinate 2 (longitude or point Y)
     fpOut << buf;
     (m_settings->globalPointCoord2AprioriSigma() == Isis::Null) ?
-      snprintf(buf, sizeof(buf),"\n              POINT %s SIGMA: N/A", coord2Str.toLatin1().data()):
-      snprintf(buf, sizeof(buf),"\n              POINT %s SIGMA: %lf (meters)", coord2Str.toLatin1().data(),
+      sprintf(buf,"\n              POINT %s SIGMA: N/A", coord2Str.toLatin1().data()):
+      sprintf(buf,"\n              POINT %s SIGMA: %lf (meters)", coord2Str.toLatin1().data(),
                 m_settings->globalPointCoord2AprioriSigma());
     // Coordinate 3 (radius or point Z)
     fpOut << buf;
     (m_settings->globalPointCoord3AprioriSigma() == Isis::Null) ?
-      snprintf(buf, sizeof(buf),"\n                 POINT %s SIGMA: N/A", coord3Str.toLatin1().data()):
-      snprintf(buf, sizeof(buf),"\n                 POINT %s SIGMA: %lf (meters)", coord3Str.toLatin1().data(),
+      sprintf(buf,"\n                 POINT %s SIGMA: N/A", coord3Str.toLatin1().data()):
+      sprintf(buf,"\n                 POINT %s SIGMA: %lf (meters)", coord3Str.toLatin1().data(),
                 m_settings->globalPointCoord3AprioriSigma());
     fpOut << buf;
     (positionSolveDegree < 1 || positionSigmas[0] == Isis::Null) ?
-        snprintf(buf, sizeof(buf),"\n          SPACECRAFT POSITION SIGMA: N/A"):
-        snprintf(buf, sizeof(buf),"\n          SPACECRAFT POSITION SIGMA: %lf (meters)",
+        sprintf(buf,"\n          SPACECRAFT POSITION SIGMA: N/A"):
+        sprintf(buf,"\n          SPACECRAFT POSITION SIGMA: %lf (meters)",
                 positionSigmas[0]);
     fpOut << buf;
 
     (positionSolveDegree < 2 || positionSigmas[1] == Isis::Null) ?
-        snprintf(buf, sizeof(buf),"\n          SPACECRAFT VELOCITY SIGMA: N/A"):
-        snprintf(buf, sizeof(buf),"\n          SPACECRAFT VELOCITY SIGMA: %lf (m/s)",
+        sprintf(buf,"\n          SPACECRAFT VELOCITY SIGMA: N/A"):
+        sprintf(buf,"\n          SPACECRAFT VELOCITY SIGMA: %lf (m/s)",
                 positionSigmas[1]);
     fpOut << buf;
 
     (positionSolveDegree < 3 || positionSigmas[2] == Isis::Null) ?
-        snprintf(buf, sizeof(buf),"\n      SPACECRAFT ACCELERATION SIGMA: N/A"):
-        snprintf(buf, sizeof(buf),"\n      SPACECRAFT ACCELERATION SIGMA: %lf (m/s/s)",
+        sprintf(buf,"\n      SPACECRAFT ACCELERATION SIGMA: N/A"):
+        sprintf(buf,"\n      SPACECRAFT ACCELERATION SIGMA: %lf (m/s/s)",
                 positionSigmas[2]);
     fpOut << buf;
 
     (pointingSolveDegree < 1 || pointingSigmas[0] == Isis::Null) ?
-        snprintf(buf, sizeof(buf),"\n                CAMERA ANGLES SIGMA: N/A"):
-        snprintf(buf, sizeof(buf),"\n                CAMERA ANGLES SIGMA: %lf (dd)",
+        sprintf(buf,"\n                CAMERA ANGLES SIGMA: N/A"):
+        sprintf(buf,"\n                CAMERA ANGLES SIGMA: %lf (dd)",
                 pointingSigmas[0]);
     fpOut << buf;
 
     (pointingSolveDegree < 2 || pointingSigmas[1] == Isis::Null) ?
-        snprintf(buf, sizeof(buf),"\n      CAMERA ANGULAR VELOCITY SIGMA: N/A"):
-        snprintf(buf, sizeof(buf),"\n      CAMERA ANGULAR VELOCITY SIGMA: %lf (dd/s)",
+        sprintf(buf,"\n      CAMERA ANGULAR VELOCITY SIGMA: N/A"):
+        sprintf(buf,"\n      CAMERA ANGULAR VELOCITY SIGMA: %lf (dd/s)",
                 pointingSigmas[1]);
     fpOut << buf;
 
     (pointingSolveDegree < 3 || pointingSigmas[2] == Isis::Null) ?
-        snprintf(buf, sizeof(buf),"\n  CAMERA ANGULAR ACCELERATION SIGMA: N/A"):
-        snprintf(buf, sizeof(buf),"\n  CAMERA ANGULAR ACCELERATION SIGMA: %lf (dd/s/s)",
+        sprintf(buf,"\n  CAMERA ANGULAR ACCELERATION SIGMA: N/A"):
+        sprintf(buf,"\n  CAMERA ANGULAR ACCELERATION SIGMA: %lf (dd/s/s)",
                 pointingSigmas[2]);
     fpOut << buf;
 
     if (m_settings->solveTargetBody()) {
-      snprintf(buf, sizeof(buf), "\n\nINPUT: TARGET BODY OPTIONS\n==============================\n");
+      sprintf(buf, "\n\nINPUT: TARGET BODY OPTIONS\n==============================\n");
       fpOut << buf;
 
       if (m_settings->solvePoleRA() && m_settings->solvePoleDec()) {
-        snprintf(buf, sizeof(buf),"\n                             POLE: RIGHT ASCENSION");
+        sprintf(buf,"\n                             POLE: RIGHT ASCENSION");
         fpOut << buf;
-        snprintf(buf, sizeof(buf),"\n                                 : DECLINATION\n");
+        sprintf(buf,"\n                                 : DECLINATION\n");
         fpOut << buf;
       }
       else if (m_settings->solvePoleRA()) {
-        snprintf(buf, sizeof(buf),"\n                             POLE: RIGHT ASCENSION\n");
+        sprintf(buf,"\n                             POLE: RIGHT ASCENSION\n");
         fpOut << buf;
       }
       else if (m_settings->solvePoleDec()) {
-        snprintf(buf, sizeof(buf),"\n                             POLE: DECLINATION\n");
+        sprintf(buf,"\n                             POLE: DECLINATION\n");
         fpOut << buf;
       }
 
       if (m_settings->solvePM() || m_settings->solvePMVelocity()
           || m_settings->solvePMAcceleration()) {
-        snprintf(buf, sizeof(buf),"\n                   PRIME MERIDIAN: W0 (OFFSET)");
+        sprintf(buf,"\n                   PRIME MERIDIAN: W0 (OFFSET)");
         fpOut << buf;
 
         if (m_settings->solvePMVelocity()) {
-          snprintf(buf, sizeof(buf),"\n                                 : WDOT (SPIN RATE)");
+          sprintf(buf,"\n                                 : WDOT (SPIN RATE)");
           fpOut << buf;
         }
         if (m_settings->solvePMAcceleration()) {
-          snprintf(buf, sizeof(buf),"\n                               :W ACCELERATION");
+          sprintf(buf,"\n                               :W ACCELERATION");
           fpOut << buf;
         }
       }
 
       if (m_settings->solveTriaxialRadii() || m_settings->solveMeanRadius()) {
         if (m_settings->solveMeanRadius()) {
-          snprintf(buf, sizeof(buf),"\n                            RADII: MEAN");
+          sprintf(buf,"\n                            RADII: MEAN");
           fpOut << buf;
         }
         else if (m_settings->solveTriaxialRadii()) {
-          snprintf(buf, sizeof(buf),"\n                            RADII: TRIAXIAL");
+          sprintf(buf,"\n                            RADII: TRIAXIAL");
           fpOut << buf;
         }
       }
     }
 
-    snprintf(buf, sizeof(buf), "\n\nJIGSAW: RESULTS\n===============\n");
+    sprintf(buf, "\n\nJIGSAW: RESULTS\n===============\n");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                         Images: %6d",numImages);
+    sprintf(buf, "\n                         Images: %6d",numImages);
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "\n                         Points: %6d",numValidPoints);
+    sprintf(buf, "\n                         Points: %6d",numValidPoints);
     fpOut << buf;
 
     if (numValidLidarPoints > 0) {
-      snprintf(buf, sizeof(buf), "\n                   Lidar Points: %6d",numValidLidarPoints);
+      sprintf(buf, "\n                   Lidar Points: %6d",numValidLidarPoints);
       fpOut << buf;
     }
 
-    snprintf(buf, sizeof(buf), "\n                 Total Measures: %6d",
+    sprintf(buf, "\n                 Total Measures: %6d",
                   (m_statisticsResults->numberObservations()
                       + m_statisticsResults->numberRejectedObservations()) / 2);
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n             Total Observations: %6d",
+    sprintf(buf, "\n             Total Observations: %6d",
                   m_statisticsResults->numberObservations()
                       + m_statisticsResults->numberRejectedObservations());
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n              Good Observations: %6d",
+    sprintf(buf, "\n              Good Observations: %6d",
                   m_statisticsResults->numberObservations());
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n          Rejected Observations: %6d",
+    sprintf(buf, "\n          Rejected Observations: %6d",
                   m_statisticsResults->numberRejectedObservations());
     fpOut << buf;
 
     if (m_statisticsResults->numberConstrainedPointParameters() > 0) {
-      snprintf(buf, sizeof(buf), "\n   Constrained Point Parameters: %6d",
+      sprintf(buf, "\n   Constrained Point Parameters: %6d",
                     m_statisticsResults->numberConstrainedPointParameters());
       fpOut << buf;
     }
 
     if (m_statisticsResults->numberConstrainedImageParameters() > 0) {
-      snprintf(buf, sizeof(buf), "\n   Constrained Image Parameters: %6d",
+      sprintf(buf, "\n   Constrained Image Parameters: %6d",
                     m_statisticsResults->numberConstrainedImageParameters());
       fpOut << buf;
     }
 
     if (m_statisticsResults->numberConstrainedTargetParameters() > 0) {
-      snprintf(buf, sizeof(buf), "\n  Constrained Target Parameters: %6d",
+      sprintf(buf, "\n  Constrained Target Parameters: %6d",
                     m_statisticsResults->numberConstrainedTargetParameters());
       fpOut << buf;
     }
 
     if (m_statisticsResults->numberLidarRangeConstraintEquations() > 0) {
-      snprintf(buf, sizeof(buf), "\n        Lidar Range Constraints: %6d",
+      sprintf(buf, "\n        Lidar Range Constraints: %6d",
               m_statisticsResults->numberLidarRangeConstraintEquations());
       fpOut << buf;
     }
 
-    snprintf(buf, sizeof(buf), "\n                       Unknowns: %6d",
+    sprintf(buf, "\n                       Unknowns: %6d",
                   m_statisticsResults->numberUnknownParameters());
     fpOut << buf;
 
     if (numInnerConstraints > 0) {
-      snprintf(buf, sizeof(buf), "\n      Inner Constraints: %6d", numInnerConstraints);
+      sprintf(buf, "\n      Inner Constraints: %6d", numInnerConstraints);
      fpOut << buf;
     }
 
     if (numDistanceConstraints > 0) {
-      snprintf(buf, sizeof(buf), "\n   Distance Constraints: %d", numDistanceConstraints);
+      sprintf(buf, "\n   Distance Constraints: %d", numDistanceConstraints);
       fpOut << buf;
     }
 
-    snprintf(buf, sizeof(buf), "\n             Degrees of Freedom: %6d", numDegreesOfFreedom);
+    sprintf(buf, "\n             Degrees of Freedom: %6d", numDegreesOfFreedom);
     fpOut << buf;
 
-    snprintf(buf, sizeof(buf), "\n           Convergence Criteria: %6.3g",
+    sprintf(buf, "\n           Convergence Criteria: %6.3g",
                                m_settings->convergenceCriteriaThreshold());
     fpOut << buf;
 
     if (convergenceCriteria == 1) {
-      snprintf(buf, sizeof(buf), "(Sigma0)");
+      sprintf(buf, "(Sigma0)");
       fpOut << buf;
     }
 
-    snprintf(buf, sizeof(buf), "\n                     Iterations: %6d", m_statisticsResults->iterations());
+    sprintf(buf, "\n                     Iterations: %6d", m_statisticsResults->iterations());
     fpOut << buf;
 
     if (m_statisticsResults->iterations() >= m_settings->convergenceCriteriaMaximumIterations()) {
-      snprintf(buf, sizeof(buf), "(Maximum reached)");
+      sprintf(buf, "(Maximum reached)");
       fpOut << buf;
     }
 
-    snprintf(buf, sizeof(buf), "\n                         Sigma0: %30.20lf\n", m_statisticsResults->sigma0());
+    sprintf(buf, "\n                         Sigma0: %30.20lf\n", m_statisticsResults->sigma0());
     fpOut << buf;
-    snprintf(buf, sizeof(buf), " Error Propagation Elapsed Time: %6.4lf (seconds)\n",
+    sprintf(buf, " Error Propagation Elapsed Time: %6.4lf (seconds)\n",
                   m_statisticsResults->elapsedTimeErrorProp());
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "             Total Elapsed Time: %6.4lf (seconds)\n",
+    sprintf(buf, "             Total Elapsed Time: %6.4lf (seconds)\n",
                   m_statisticsResults->elapsedTime());
     fpOut << buf;
     if (m_statisticsResults->numberObservations()
         + m_statisticsResults->numberRejectedObservations()
         > 100) {
-      snprintf(buf, sizeof(buf), "\n           Residual Percentiles:\n");
+      sprintf(buf, "\n           Residual Percentiles:\n");
       fpOut << buf;
 
     // residual prob distribution values are calculated/printed
@@ -1068,7 +1006,7 @@ namespace Isis {
           double resValue66 =
               m_statisticsResults->
                   residualsCumulativeProbabilityDistribution().value(cumProb + 0.66);
-          snprintf(buf, sizeof(buf), "                 Percentile %3d: %+8.3lf"
+          sprintf(buf, "                 Percentile %3d: %+8.3lf"
                        "                 Percentile %3d: %+8.3lf"
                        "                 Percentile %3d: %+8.3lf\n",
                                          bin,      resValue,
@@ -1082,21 +1020,21 @@ namespace Isis {
         throw IException(e, IException::Io, msg, _FILEINFO_);
       }
       try {
-        snprintf(buf, sizeof(buf), "\n              Residual Box Plot:");
+        sprintf(buf, "\n              Residual Box Plot:");
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n                        minimum: %+8.3lf",
+        sprintf(buf, "\n                        minimum: %+8.3lf",
                 m_statisticsResults->residualsCumulativeProbabilityDistribution().min());
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n                     Quartile 1: %+8.3lf",
+        sprintf(buf, "\n                     Quartile 1: %+8.3lf",
                 m_statisticsResults->residualsCumulativeProbabilityDistribution().value(0.25));
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n                         Median: %+8.3lf",
+        sprintf(buf, "\n                         Median: %+8.3lf",
                 m_statisticsResults->residualsCumulativeProbabilityDistribution().value(0.50));
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n                     Quartile 3: %+8.3lf",
+        sprintf(buf, "\n                     Quartile 3: %+8.3lf",
                 m_statisticsResults->residualsCumulativeProbabilityDistribution().value(0.75));
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\n                        maximum: %+8.3lf\n",
+        sprintf(buf, "\n                        maximum: %+8.3lf\n",
                 m_statisticsResults->residualsCumulativeProbabilityDistribution().max());
         fpOut << buf;
       }
@@ -1123,7 +1061,7 @@ namespace Isis {
       }
     }
 
-    snprintf(buf, sizeof(buf), "\nIMAGE MEASURES SUMMARY\n==========================\n\n");
+    sprintf(buf, "\nIMAGE MEASURES SUMMARY\n==========================\n\n");
     fpOut << buf;
 
     // Pad each element in the table with the space for the longest image
@@ -1133,21 +1071,21 @@ namespace Isis {
       header += "                                   Lidar RMS(pixels)";
     }
     // This is padded by an extra 11 to move it center to the table
-    snprintf(buf, sizeof(buf),"%*s\n", header.length() + 11 + filePadding, header.toLatin1().data());
+    sprintf(buf,"%*s\n", header.length() + 11 + filePadding, header.toLatin1().data());
     fpOut << buf;
 
     QString dividers("***************************   *******************************************");
     if (m_statisticsResults->outputLidarData()) {
       dividers += "   *******************************************";
     }
-    snprintf(buf, sizeof(buf),"%*s\n", dividers.length() + 1 + filePadding, dividers.toLatin1().data());
+    sprintf(buf,"%*s\n", dividers.length() + 1 + filePadding, dividers.toLatin1().data());
     fpOut << buf;
 
     QString fields("|  Accepted  |   Total    |   |   Samples   |    Lines    |    Total    |");
     if (m_statisticsResults->outputLidarData()) {
       fields += "   |   Samples   |    Lines    |    Total    |";
     }
-    snprintf(buf, sizeof(buf),"%*s\n", fields.length() + 1 + filePadding, fields.toLatin1().data());
+    sprintf(buf,"%*s\n", fields.length() + 1 + filePadding, fields.toLatin1().data());
     fpOut << buf;
 
     int numMeasures, numLidarMeasures;
@@ -1186,13 +1124,13 @@ namespace Isis {
         QStringList List;
         List = filename.split("/");
 
-        snprintf(buf, sizeof(buf),"%-*s" ,filePadding + 1, bundleImage->fileName().toLatin1().data());
+        sprintf(buf,"%-*s" ,filePadding + 1, bundleImage->fileName().toLatin1().data());
         fpOut << buf;
 
-        snprintf(buf, sizeof(buf), " %12d %12d     ", numUsed, numMeasures);
+        sprintf(buf, " %12d %12d     ", numUsed, numMeasures);
         fpOut << buf;
 
-        snprintf(buf, sizeof(buf),"%13.4lf %13.4lf %13.4lf",
+        sprintf(buf,"%13.4lf %13.4lf %13.4lf",
                 rmsSampleResiduals,rmsLineResiduals,rmsLandSResiduals);
 
         fpOut << buf;
@@ -1213,16 +1151,16 @@ namespace Isis {
 
           numLidarUsed = numLidarMeasures - numLidarRejectedMeasures;
 
-          snprintf(buf, sizeof(buf), " %12d %12d     ", numLidarUsed, numLidarMeasures);
+          sprintf(buf, " %12d %12d     ", numLidarUsed, numLidarMeasures);
           fpOut << buf;
 
-          snprintf(buf, sizeof(buf),"%13.4lf %13.4lf %13.4lf",
+          sprintf(buf,"%13.4lf %13.4lf %13.4lf",
                   rmsLidarSampleResiduals,rmsLidarLineResiduals,rmsLidarLandSResiduals);
 
           fpOut << buf;
         }
 
-        snprintf(buf, sizeof(buf), " \n");
+        sprintf(buf, " \n");
         fpOut << buf;
         imageIndex++;
       }
@@ -1230,9 +1168,9 @@ namespace Isis {
 
     // Do something similar to above but left justify the string and add a 33
     // character buffer
-    snprintf(buf, sizeof(buf),"%*s", -(filePadding + 33), "\nTotal RMS:");
+    sprintf(buf,"%*s", -(filePadding + 33), "\nTotal RMS:");
     fpOut << buf;
-    snprintf(buf, sizeof(buf),"%13.4lf %13.4lf %13.4lf\n",
+    sprintf(buf,"%13.4lf %13.4lf %13.4lf\n",
     rmsSamplesTotal.Rms(),rmsLinesTotal.Rms(),rmsTotals.Rms());
     fpOut << buf;
 
@@ -1322,21 +1260,21 @@ namespace Isis {
         for (int k = 0; k < numImages; k++) {
           BundleImageQsp image = observation->at(k);
 
-          snprintf(buf, sizeof(buf), "%s", image->fileName().toLatin1().data());
+          sprintf(buf, "%s", image->fileName().toLatin1().data());
           fpOut << buf;
-          snprintf(buf, sizeof(buf),",");
+          sprintf(buf,",");
           fpOut << buf;
 
           fpOut << toString(rmsImageSampleResiduals[imgIndex].Rms()).toLatin1().data();
-          snprintf(buf, sizeof(buf),",");
+          sprintf(buf,",");
           fpOut << buf;
 
           fpOut << toString(rmsImageLineResiduals[imgIndex].Rms()).toLatin1().data();
-          snprintf(buf, sizeof(buf),",");
+          sprintf(buf,",");
           fpOut << buf;
 
           fpOut << toString(rmsImageResiduals[imgIndex].Rms()).toLatin1().data();
-          snprintf(buf, sizeof(buf),",");
+          sprintf(buf,",");
           fpOut << buf;
 
           QString observationString =
@@ -1349,7 +1287,7 @@ namespace Isis {
 
           fpOut << (const char*) observationString.toLatin1().data();
 
-          snprintf(buf, sizeof(buf),"\n");
+          sprintf(buf,"\n");
           fpOut << buf;
           imgIndex++;
 
@@ -1393,10 +1331,10 @@ namespace Isis {
 
     // output target body header if solving for target
     if (m_settings->solveTargetBody()) {
-      snprintf(buf, sizeof(buf), "\nTARGET BODY\n==========================\n");
+      sprintf(buf, "\nTARGET BODY\n==========================\n");
       fpOut << buf;
 
-      snprintf(buf, sizeof(buf), "\n   Target         Initial            Total               "
+      sprintf(buf, "\n   Target         Initial            Total               "
                    "Final           Initial           Final\n"
                    "Parameter         Value            Correction           "
                    "Value             Accuracy          Accuracy\n");
@@ -1408,7 +1346,7 @@ namespace Isis {
     }
 
     // output image exterior orientation header
-    snprintf(buf, sizeof(buf), "\nIMAGE EXTERIOR ORIENTATION\n==========================\n");
+    sprintf(buf, "\nIMAGE EXTERIOR ORIENTATION\n==========================\n");
     fpOut << buf;
 
     QMap<QString, QStringList> imagesAndParameters;
@@ -1427,17 +1365,17 @@ namespace Isis {
       int numImages = observation->size();
       for (int j = 0; j < numImages; j++) {
         BundleImageQsp image = observation->at(j);
-        snprintf(buf, sizeof(buf), "\nImage Full File Name: %s\n", image->fileName().toLatin1().data());
+        sprintf(buf, "\nImage Full File Name: %s\n", image->fileName().toLatin1().data());
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "\nImage Serial Number: %s\n", image->serialNumber().toLatin1().data());
-        fpOut << buf;
-
-        snprintf(buf, sizeof(buf),"Image           Initial                 Total                  Final                                      Accuracy\n");
-        fpOut << buf;
-        snprintf(buf, sizeof(buf),"Parameter       Value                   Correction             Value                      Initial           Final           Units\n");
+        sprintf(buf, "\nImage Serial Number: %s\n", image->serialNumber().toLatin1().data());
         fpOut << buf;
 
-        snprintf(buf, sizeof(buf),"                                                                                          "
+        sprintf(buf,"Image           Initial                 Total                  Final                                      Accuracy\n");
+        fpOut << buf;
+        sprintf(buf,"Parameter       Value                   Correction             Value                      Initial           Final           Units\n");
+        fpOut << buf;
+
+        sprintf(buf,"                                                                                          "
                     "***************************************\n");
         fpOut << buf;
 
@@ -1457,21 +1395,21 @@ namespace Isis {
 
     // output point uncertainty statistics if error propagation is on
     if (berrorProp) {
-      snprintf(buf, sizeof(buf), "\n\n\nPOINTS UNCERTAINTY SUMMARY\n==========================\n\n");
+      sprintf(buf, "\n\n\nPOINTS UNCERTAINTY SUMMARY\n==========================\n\n");
       fpOut << buf;
 
       // Coordinate 1 (latitude or point x) summary
       QString
         coordName = surfacePointCoordName(m_settings->controlPointCoordTypeReports(),
                                           SurfacePoint::One);
-      snprintf(buf, sizeof(buf), "RMS Sigma %s(m)%20.8lf\n", coordName.toLatin1().data(),
+      sprintf(buf, "RMS Sigma %s(m)%20.8lf\n", coordName.toLatin1().data(),
               m_statisticsResults->sigmaCoord1StatisticsRms());
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "MIN Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
+      sprintf(buf, "MIN Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
               m_statisticsResults->minSigmaCoord1Distance().meters(),
               m_statisticsResults->minSigmaCoord1PointId().toLatin1().data());
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "MAX Sigma %s(m)%20.8lf at %s\n\n", coordName.toLatin1().data(),
+      sprintf(buf, "MAX Sigma %s(m)%20.8lf at %s\n\n", coordName.toLatin1().data(),
               m_statisticsResults->maxSigmaCoord1Distance().meters(),
               m_statisticsResults->maxSigmaCoord1PointId().toLatin1().data());
       fpOut << buf;
@@ -1479,14 +1417,14 @@ namespace Isis {
       // Coordinate 2 (longitude or point y) summary
       coordName = surfacePointCoordName(m_settings->controlPointCoordTypeReports(),
                                         SurfacePoint::Two);
-      snprintf(buf, sizeof(buf), "RMS Sigma %s(m)%20.8lf\n", coordName.toLatin1().data(),
+      sprintf(buf, "RMS Sigma %s(m)%20.8lf\n", coordName.toLatin1().data(),
               m_statisticsResults->sigmaCoord2StatisticsRms());
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "MIN Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
+      sprintf(buf, "MIN Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
               m_statisticsResults->minSigmaCoord2Distance().meters(),
               m_statisticsResults->minSigmaCoord2PointId().toLatin1().data());
       fpOut << buf;
-      snprintf(buf, sizeof(buf), "MAX Sigma %s(m)%20.8lf at %s\n\n", coordName.toLatin1().data(),
+      sprintf(buf, "MAX Sigma %s(m)%20.8lf at %s\n\n", coordName.toLatin1().data(),
               m_statisticsResults->maxSigmaCoord2Distance().meters(),
               m_statisticsResults->maxSigmaCoord2PointId().toLatin1().data());
       fpOut << buf;
@@ -1495,38 +1433,38 @@ namespace Isis {
       coordName = surfacePointCoordName(m_settings->controlPointCoordTypeReports(),
                                         SurfacePoint::Three);
       if ( m_settings->solveRadius() ) {
-        snprintf(buf, sizeof(buf), "RMS Sigma %s(m)%20.8lf\n", coordName.toLatin1().data(),
+        sprintf(buf, "RMS Sigma %s(m)%20.8lf\n", coordName.toLatin1().data(),
                 m_statisticsResults->sigmaCoord3StatisticsRms());
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "MIN Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
+        sprintf(buf, "MIN Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
                 m_statisticsResults->minSigmaCoord3Distance().meters(),
                 m_statisticsResults->minSigmaCoord3PointId().toLatin1().data());
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "MAX Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
+        sprintf(buf, "MAX Sigma %s(m)%20.8lf at %s\n", coordName.toLatin1().data(),
                 m_statisticsResults->maxSigmaCoord3Distance().meters(),
                 m_statisticsResults->maxSigmaCoord3PointId().toLatin1().data());
         fpOut << buf;
       }
       else {
-        snprintf(buf, sizeof(buf), "   RMS Sigma Radius(m)                 N/A\n");
+        sprintf(buf, "   RMS Sigma Radius(m)                 N/A\n");
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "   MIN Sigma Radius(m)                 N/A\n");
+        sprintf(buf, "   MIN Sigma Radius(m)                 N/A\n");
         fpOut << buf;
-        snprintf(buf, sizeof(buf), "   MAX Sigma Radius(m)                 N/A\n");
+        sprintf(buf, "   MAX Sigma Radius(m)                 N/A\n");
         fpOut << buf;
       }
     }
 
     // output point summary data header
     if (m_settings->controlPointCoordTypeReports() == SurfacePoint::Latitudinal) {
-      snprintf(buf, sizeof(buf), "\n\nPOINTS SUMMARY\n==============\n%103s"
+      sprintf(buf, "\n\nPOINTS SUMMARY\n==============\n%103s"
             "Sigma          Sigma              Sigma\n"
             "           Label         Status     Rays    RMS"
             "        Latitude       Longitude          Radius"
             "        Latitude       Longitude          Radius\n", "");
     }
     else {  // Must be Rectangular
-      snprintf(buf, sizeof(buf), "\n\nPOINTS SUMMARY\n==============\n%103s"
+      sprintf(buf, "\n\nPOINTS SUMMARY\n==============\n%103s"
             "Sigma          Sigma              Sigma\n"
             "           Label         Status     Rays    RMS"
             "         Point X            Point Y          Point Z"
@@ -1554,7 +1492,7 @@ namespace Isis {
     }
 
     // output point detail data header
-    snprintf(buf, sizeof(buf), "\n\nPOINTS DETAIL\n=============\n\n");
+    sprintf(buf, "\n\nPOINTS DETAIL\n=============\n\n");
     fpOut << buf;
 
     bool solveRadius = m_settings->solveRadius();
@@ -1614,13 +1552,13 @@ namespace Isis {
 
     // print column headers
     if (m_settings->errorPropagation()) {
-      snprintf(buf, sizeof(buf), ",,,,,3-d,3-d,3-d,Sigma,Sigma,Sigma,Correction,Correction,Correction,Coordinate,"
+      sprintf(buf, ",,,,,3-d,3-d,3-d,Sigma,Sigma,Sigma,Correction,Correction,Correction,Coordinate,"
               "Coordinate,Coordinate\nPoint,Point,Accepted,Rejected,Residual,Latitude,Longitude,"
               "Radius,Latitude,Longitude,Radius,Latitude,Longitude,Radius,X,Y,Z\nLabel,Status,"
               "Measures,Measures,RMS,(dd),(dd),(km),(m),(m),(m),(m),(m),(m),(km),(km),(km)\n");
     }
     else {
-      snprintf(buf, sizeof(buf), ",,,,,3-d,3-d,3-d,Correction,Correction,Correction,Coordinate,Coordinate,"
+      sprintf(buf, ",,,,,3-d,3-d,3-d,Correction,Correction,Correction,Coordinate,Coordinate,"
               "Coordinate\nPoint,Point,Accepted,Rejected,Residual,Latitude,Longitude,Radius,"
               "Latitude,Longitude,Radius,X,Y,Z\nLabel,Status,Measures,Measures,RMS,(dd),(dd),(km),"
               "(m),(m),(m),(km),(km),(km)\n");
@@ -1674,14 +1612,14 @@ namespace Isis {
         dSigmaLong = bundlecontrolpoint->adjustedSurfacePoint().GetLonSigmaDistance().meters();
         dSigmaRadius = bundlecontrolpoint->adjustedSurfacePoint().GetLocalRadiusSigma().meters();
 
-        snprintf(buf, sizeof(buf), "%s,%s,%d,%d,%6.2lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,"
+        sprintf(buf, "%s,%s,%d,%d,%6.2lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,"
                      "%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf\n",
                 bundlecontrolpoint->id().toLatin1().data(), strStatus.toLatin1().data(),
                 numMeasures, numRejectedMeasures, dResidualRms, dLat, dLon, dRadius, dSigmaLat,
                 dSigmaLong, dSigmaRadius, cor_lat_m, cor_lon_m, cor_rad_m, dX, dY, dZ);
       }
       else
-        snprintf(buf, sizeof(buf), "%s,%s,%d,%d,%6.2lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,"
+        sprintf(buf, "%s,%s,%d,%d,%6.2lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,"
                      "%16.8lf,%16.8lf\n",
                 bundlecontrolpoint->id().toLatin1().data(), strStatus.toLatin1().data(),
                 numMeasures, numRejectedMeasures, dResidualRms, dLat, dLon, dRadius, cor_lat_m,
@@ -1721,12 +1659,12 @@ namespace Isis {
 
     // print column headers
     if (m_settings->errorPropagation()) {
-      snprintf(buf, sizeof(buf), ",,measured,a priori,adjusted,adjusted\n"
+      sprintf(buf, ",,measured,a priori,adjusted,adjusted\n"
               "point,image,range,sigma,range,sigma,residual\n"
               "id,name,(km),(km),(km),(km),(km)\n");
     }
     else {
-      snprintf(buf, sizeof(buf), ",,measured,a priori,adjusted\n"
+      sprintf(buf, ",,measured,a priori,adjusted\n"
                    "point,image,range,sigma,range,residual\n"
                    "id,name,(km),(km),(km),(km)\n");
     }
@@ -1773,12 +1711,12 @@ namespace Isis {
 
     // output column headers
 
-    snprintf(buf, sizeof(buf), ",,,x image,y image,Measured,Measured,sample,line,Residual Vector\n");
+    sprintf(buf, ",,,x image,y image,Measured,Measured,sample,line,Residual Vector\n");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "Point,Image,Image,coordinate,coordinate,"
+    sprintf(buf, "Point,Image,Image,coordinate,coordinate,"
                  "Sample,Line,residual,residual,Magnitude\n");
     fpOut << buf;
-    snprintf(buf, sizeof(buf), "Label,Filename,Serial Number,(mm),(mm),"
+    sprintf(buf, "Label,Filename,Serial Number,(mm),(mm),"
                  "(pixels),(pixels),(pixels),(pixels),(pixels),Rejected\n");
     fpOut << buf;
 
@@ -1807,7 +1745,7 @@ namespace Isis {
         }
 
         if (bundleMeasure->isRejected()) {
-          snprintf(buf, sizeof(buf), "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,*\n",
+          sprintf(buf, "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,*\n",
                   bundleControlPoint->id().toLatin1().data(),
                   bundleMeasure->parentBundleImage()->fileName().toLatin1().data(),
                   bundleMeasure->cubeSerialNumber().toLatin1().data(),
@@ -1820,7 +1758,7 @@ namespace Isis {
                   bundleMeasure->residualMagnitude());
         }
         else {
-          snprintf(buf, sizeof(buf), "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf\n",
+          sprintf(buf, "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf\n",
                   bundleControlPoint->id().toLatin1().data(),
                   bundleMeasure->parentBundleImage()->fileName().toLatin1().data(),
                   bundleMeasure->cubeSerialNumber().toLatin1().data(),
@@ -1858,7 +1796,7 @@ namespace Isis {
         }
 
         if (bundleMeasure->isRejected()) {
-          snprintf(buf, sizeof(buf), "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,*\n",
+          sprintf(buf, "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,*\n",
                   bundleLidarPoint->id().toLatin1().data(),
                   bundleMeasure->parentBundleImage()->fileName().toLatin1().data(),
                   bundleMeasure->cubeSerialNumber().toLatin1().data(),
@@ -1871,7 +1809,7 @@ namespace Isis {
                   bundleMeasure->residualMagnitude());
         }
         else {
-          snprintf(buf, sizeof(buf), "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf\n",
+          sprintf(buf, "%s,%s,%s,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf,%16.8lf\n",
                   bundleLidarPoint->id().toLatin1().data(),
                   bundleMeasure->parentBundleImage()->fileName().toLatin1().data(),
                   bundleMeasure->cubeSerialNumber().toLatin1().data(),
@@ -2028,6 +1966,139 @@ namespace Isis {
     }
 
     stream.writeEndElement(); //end bundleSolutionInfo
+  }
+
+
+  /**
+   * Create an XML Handler (reader) that can populate the BundleSolutionInfo class data. See
+   *   BundleSolutionInfo::save() for the expected format.
+   *
+   * @param bundleSolutionInfo The bundle solution we're going to be initializing
+   * @param project The project we are working in
+   */
+  BundleSolutionInfo::XmlHandler::XmlHandler(BundleSolutionInfo *bundleSolutionInfo,
+                                             Project *project) {
+    m_xmlHandlerBundleSolutionInfo = bundleSolutionInfo;
+    m_xmlHandlerProject = project;
+    m_xmlHandlerCharacters = "";
+  }
+
+
+  /**
+   * Destructor
+   */
+  BundleSolutionInfo::XmlHandler::~XmlHandler() {
+  }
+
+
+  /**
+   * Adds characters to m_xmlHandlerCharacters
+   *
+   * @param ch QString of characters to add
+   *
+   * @return @b bool Almost always true. Only false if the characters cannot be read
+   */
+  bool BundleSolutionInfo::XmlHandler::characters(const QString &ch) {
+    m_xmlHandlerCharacters += ch;
+    return XmlStackedHandler::characters(ch);
+  }
+
+
+  /**
+   * Handle an XML start element. This expects <image/> and <displayProperties/> elements.
+   *
+   * @param namespaceURI ???
+   * @param localName The keyword name given to the member variable in the XML.
+   * @param qName ???
+   * @param atts The attribute containing the keyword value for the given local name.
+   *
+   * @return @b bool True if we should continue reading the XML.
+   */
+  bool BundleSolutionInfo::XmlHandler::startElement(const QString &namespaceURI,
+                                                    const QString &localName,
+                                                    const QString &qName,
+                                                    const QXmlAttributes &atts) {
+    m_xmlHandlerCharacters = "";
+
+    if (XmlStackedHandler::startElement(namespaceURI, localName, qName, atts)) {
+
+      if (localName == "bundleSettings") {
+        m_xmlHandlerBundleSolutionInfo->m_settings =
+            BundleSettingsQsp(new BundleSettings(m_xmlHandlerProject, reader()));
+      }
+      else if (localName == "bundleResults") {
+        m_xmlHandlerBundleSolutionInfo->m_statisticsResults = new BundleResults(m_xmlHandlerProject,
+                                                                                reader());
+      }
+      else if (localName == "imageList") {
+        m_xmlHandlerBundleSolutionInfo->m_adjustedImages->append(
+            new ImageList(m_xmlHandlerProject, reader()));
+      }
+      else if (localName == "outputControl") {
+        FileName outputControlPath = FileName(m_xmlHandlerProject->bundleSolutionInfoRoot() + "/"
+                                              + m_xmlHandlerBundleSolutionInfo->runTime());
+
+        m_xmlHandlerBundleSolutionInfo->m_outputControl = new Control(outputControlPath, reader());
+      }
+    }
+    return true;
+  }
+
+
+  /**
+   * Handle an XML end element.
+   *
+   * @param namespaceURI ???
+   * @param localName The keyword name given to the member variable in the XML.
+   * @param qName ???
+   *
+   * @return @b bool Returns XmlStackedHandler's endElement()
+   */
+  bool BundleSolutionInfo::XmlHandler::endElement(const QString &namespaceURI,
+                                                  const QString &localName,
+                                                  const QString &qName) {
+    // This is done for unitTest which has no Project
+    QString projectRoot;
+    if (m_xmlHandlerProject) {
+      projectRoot = m_xmlHandlerProject->projectRoot() + "/";
+    }
+
+    if (localName == "id") {
+      // all constructors assign a Uuid - we need to give it a one from the XML
+      assert(m_xmlHandlerBundleSolutionInfo->m_id);
+      delete m_xmlHandlerBundleSolutionInfo->m_id;
+      m_xmlHandlerBundleSolutionInfo->m_id = new QUuid(m_xmlHandlerCharacters);
+    }
+    else if (localName == "name") {
+      m_xmlHandlerBundleSolutionInfo->m_name = m_xmlHandlerCharacters;
+    }
+    else if (localName == "runTime") {
+      m_xmlHandlerBundleSolutionInfo->m_runTime = m_xmlHandlerCharacters;
+    }
+    else if (localName == "inputFileName") {
+      assert(m_xmlHandlerBundleSolutionInfo->m_inputControlNetFileName == NULL);
+      m_xmlHandlerBundleSolutionInfo->m_inputControlNetFileName = new FileName(
+        projectRoot + m_xmlHandlerCharacters);
+    }
+    else if (localName == "bundleOutTXT") {
+      m_xmlHandlerBundleSolutionInfo->m_txtBundleOutputFilename =
+        projectRoot + m_xmlHandlerCharacters;
+    }
+    else if (localName == "imagesCSV") {
+      m_xmlHandlerBundleSolutionInfo->m_csvSavedImagesFilename =
+        projectRoot + m_xmlHandlerCharacters;
+    }
+    else if (localName == "pointsCSV") {
+      m_xmlHandlerBundleSolutionInfo->m_csvSavedPointsFilename =
+        projectRoot + m_xmlHandlerCharacters;
+    }
+    else if (localName == "residualsCSV") {
+      m_xmlHandlerBundleSolutionInfo->m_csvSavedResidualsFilename =
+        projectRoot + m_xmlHandlerCharacters;
+    }
+
+    m_xmlHandlerCharacters = "";
+    return XmlStackedHandler::endElement(namespaceURI, localName, qName);
   }
 
 

@@ -85,6 +85,7 @@ namespace Isis {
       static Preference *p_preference;   //!< Pointer to a Preference object
       static bool p_unitTest;            /**< Flag indicating whether the file
                                               is a unitTest or not.*/
+
       static void Shutdown();
   };
 };

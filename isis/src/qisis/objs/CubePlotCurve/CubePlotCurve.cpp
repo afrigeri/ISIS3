@@ -380,7 +380,7 @@ namespace Isis {
 
     QString header("PLOT_TOOL_CURVE_V1");
     int size = header.size();
-    classData.append(header.toUtf8());
+    classData.append(header);
 
     size = m_sourceCube.size();
     classData.append((char *)&size, sizeof(int));

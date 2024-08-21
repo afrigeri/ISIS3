@@ -45,7 +45,7 @@ namespace Isis {
    */
   FileTool::FileTool(QWidget *parent) : Tool(parent) {
     p_parent = parent;
-    p_dir.setPath("/thisDirDoesNotExist!");
+    p_dir = "/thisDirDoesNotExist!";
     p_open = new QAction(parent);
     p_open->setShortcut(Qt::CTRL + Qt::Key_O);
     p_open->setText("&Open...");
@@ -915,8 +915,7 @@ namespace Isis {
     // Initialize a printer
     static QPrinter *printer = NULL;
     if (printer == NULL) printer = new QPrinter;
-    QPageSize pageSize(QPageSize::Letter);
-    printer->setPageSize(pageSize);
+    printer->setPageSize(QPrinter::Letter);
     printer->setColorMode(QPrinter::GrayScale);
     if (cubeViewport()->isColor()) printer->setColorMode(QPrinter::Color);
 

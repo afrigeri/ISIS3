@@ -16,4 +16,3 @@ foreach( mod ${modules} )
   add_isis_module(${strippedmod} ${strippedmod})
 endforeach()
 
-

@@ -42,7 +42,6 @@ find files of those names at the top level of this repository. **/
 #include "TProjection.h"
 #include "Longitude.h"
 
-
 using namespace std;
 
 namespace Isis {
@@ -630,15 +629,10 @@ namespace Isis {
 
     initLabelFromFile(cubeFileName, (access == "rw"));
 
-    try {
-      Isis::CubeAttributeInput att(cubeFileName);
-      if(att.bands().size() != 0) {
-        vector<QString> bands = att.bands();
-        setVirtualBands(bands);
-      }
-    } catch(IException& e) {
-      // Either the cube is an output cube that has already been opened or 
-      // there is an exception parsing and adding an attribute
+    Isis::CubeAttributeInput att(cubeFileName);
+    if(att.bands().size() != 0) {
+      vector<QString> bands = att.bands();
+      setVirtualBands(bands);
     }
 
     // Figure out the name of the data file

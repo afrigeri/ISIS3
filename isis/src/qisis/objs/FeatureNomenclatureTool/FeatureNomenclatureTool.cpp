@@ -34,7 +34,6 @@
 #include "Target.h"
 #include "ToolPad.h"
 
-using namespace std;
 
 namespace Isis {
 
@@ -673,11 +672,11 @@ namespace Isis {
           QMap<QString, QVariant> data;
           data["Feature"] = QVariant::fromValue<FeatureNomenclature::Feature>(
               feature);
-          data["Viewport"] = QVariant::fromValue(vp);
-          data["Target"] = QVariant::fromValue(targetName);
+          data["Viewport"] = qVariantFromValue(vp);
+          data["Target"] = qVariantFromValue(targetName);
 
           m_foundFeaturesCombo->insertItem(insertPos, displayName,
-              QVariant::fromValue(data));
+              qVariantFromValue(data));
         }
       }
      updatingFeaturesProgress.setValue( features.count() );
@@ -1014,7 +1013,7 @@ namespace Isis {
     QSettings settings(
         config.expanded(), QSettings::NativeFormat);
     settings.setValue("fontSize", m_fontSize);
-    settings.setValue("fontColor", QVariant::fromValue(*m_fontColor));
+    settings.setValue("fontColor", qVariantFromValue(*m_fontColor));
     settings.setValue("defaultEnabled", m_defaultEnabled);
     settings.setValue("disclaimerShown", m_disclaimedAlready);
     settings.setValue("showApprovedOnly", m_showApprovedOnly);
@@ -1445,7 +1444,7 @@ namespace Isis {
     m_featureScreenAreas = new QList<FeatureDisplayPosition>;
     m_viewportCubeRange = new QPair<QPointF, QPointF>;
 
-    sort(features.begin(), features.end(),
+    qSort(features.begin(), features.end(),
           &FeatureNomenclature::featureDiameterGreaterThan);
 
     for (int i = 0; i < features.count(); i++) {
@@ -1623,7 +1622,7 @@ namespace Isis {
               QPointF intersectionPoint;
 
               if (point.y() < textArea.top()) {
-                if (topTextBorder.intersects(fullVector, &intersectionPoint) ==
+                if (topTextBorder.intersect(fullVector, &intersectionPoint) ==
                     QLineF::BoundedIntersection) {
                   newVectorStart = QPoint(qRound(intersectionPoint.x()),
                                           qRound(intersectionPoint.y()));
@@ -1631,7 +1630,7 @@ namespace Isis {
               }
 
               if (point.x() > textArea.right()) {
-                if (rightTextBorder.intersects(fullVector, &intersectionPoint) ==
+                if (rightTextBorder.intersect(fullVector, &intersectionPoint) ==
                     QLineF::BoundedIntersection) {
                   newVectorStart = QPoint(qRound(intersectionPoint.x()),
                                           qRound(intersectionPoint.y()));
@@ -1639,7 +1638,7 @@ namespace Isis {
               }
 
               if (point.y() > textArea.bottom()) {
-                if (bottomTextBorder.intersects(fullVector, &intersectionPoint) ==
+                if (bottomTextBorder.intersect(fullVector, &intersectionPoint) ==
                     QLineF::BoundedIntersection) {
                   newVectorStart = QPoint(qRound(intersectionPoint.x()),
                                           qRound(intersectionPoint.y()));
@@ -1647,7 +1646,7 @@ namespace Isis {
               }
 
               if (point.x() < textArea.left()) {
-                if (leftTextBorder.intersects(fullVector, &intersectionPoint) ==
+                if (leftTextBorder.intersect(fullVector, &intersectionPoint) ==
                     QLineF::BoundedIntersection) {
                   newVectorStart = QPoint(qRound(intersectionPoint.x()),
                                           qRound(intersectionPoint.y()));
@@ -1801,7 +1800,7 @@ namespace Isis {
 
         QString featureName = feature.name();
         QRect textDisplayArea(QPoint(viewportX, viewportY),
-                              QSize(fontMetrics.horizontalAdvance(featureName) + 4,
+                              QSize(fontMetrics.width(featureName) + 4,
                                     fontMetrics.height()));
         // Center the text on the viewportX,Y instead of starting it there...
         textDisplayArea.moveTopLeft(textDisplayArea.topLeft() -

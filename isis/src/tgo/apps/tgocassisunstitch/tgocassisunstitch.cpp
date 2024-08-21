@@ -11,7 +11,6 @@ find files of those names at the top level of this repository. **/
 #include <QList>
 #include <QScopedPointer>
 #include <QString>
-#include <QFile>
 
 #include "AlphaCube.h"
 #include "Blob.h"

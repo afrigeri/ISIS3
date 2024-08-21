@@ -14,6 +14,7 @@ find files of those names at the top level of this repository. **/
 #include <QObject>
 
 #include "DisplayProperties.h"
+#include "XmlStackedHandler.h"
 
 class QAction;
 class QXmlStreamWriter;
@@ -23,6 +24,7 @@ namespace Isis {
   class Project;
   class Pvl;
   class PvlObject;
+  class XmlStackedHandlerReader;
 
   /**
    * @brief This is the GUI communication mechanism for target body objects.
@@ -77,6 +79,7 @@ namespace Isis {
 
 
       TargetBodyDisplayProperties(QString displayName, QObject *parent = NULL);
+      TargetBodyDisplayProperties(XmlStackedHandlerReader *xmlReader, QObject *parent = NULL);
       virtual ~TargetBodyDisplayProperties();
 
 //      void fromPvl(const PvlObject &pvl);
@@ -102,6 +105,33 @@ namespace Isis {
 
     private slots:
       void toggleShowLabel();
+
+    private:
+      /**
+       * @brief Process an XML file containing information about a WorkOrder.
+       *
+       * @author 2012-??-?? Steven Lambright
+       *
+       * @internal
+       */
+      class XmlHandler : public XmlStackedHandler {
+        public:
+          XmlHandler(TargetBodyDisplayProperties *displayProperties);
+
+          virtual bool startElement(const QString &namespaceURI, const QString &localName,
+                                    const QString &qName, const QXmlAttributes &atts);
+
+          virtual bool characters(const QString &ch);
+
+          virtual bool endElement(const QString &namespaceURI, const QString &localName,
+                                  const QString &qName);
+
+        private:
+          Q_DISABLE_COPY(XmlHandler);
+
+          TargetBodyDisplayProperties *m_displayProperties;
+          QString m_hexData;
+      };
 
     private:
       TargetBodyDisplayProperties(const TargetBodyDisplayProperties &);

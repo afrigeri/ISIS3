@@ -98,8 +98,8 @@ namespace Isis {
        *
        * @internal
        */
-      class CreateControlsFunctor : public std::function<
-          Control *(const QPair<FileName, Progress *> &)> {
+      class CreateControlsFunctor : public std::unary_function<
+          const QPair<FileName, Progress *> &, Control *> {
         public:
           CreateControlsFunctor(Project *project, QDir destinationFolder);
           Control *operator()(const QPair<FileName, Progress *> &cnetFilename);

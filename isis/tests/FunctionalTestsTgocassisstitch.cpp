@@ -22,11 +22,9 @@ TEST(TgoCassisstitch, TgoCassisstitchMultiframeTest) {
   cubeList->append("data/tgoCassis/tgocassisstitch/CAS-MCO-2016-11-22T16.16.16.833-RED-01006-B1_crop.cub");
   cubeList->append("data/tgoCassis/tgocassisstitch/CAS-MCO-2016-11-22T16.16.16.833-NIR-02006-B1_crop.cub");
   cubeList->append("data/tgoCassis/tgocassisstitch/CAS-MCO-2016-11-22T16.16.16.833-PAN-00006-B1_crop.cub");
-  
+
   QString cubeListFile = prefix.path() + "/cubelist.lis";
   cubeList->write(cubeListFile);
-
-  QString cubeName = "default";
 
   QVector<QString> args = {"fromlist=" + cubeListFile,
                            "outputprefix=" + prefix.path() + "/CAS-MCO"};
@@ -222,10 +220,7 @@ TEST(TgoCassisstitch, TgoCassisstitchSingleframeTest) {
   QString cubeListFile = prefix.path() + "/cubelist.lis";
   cubeList->write(cubeListFile);
 
-  QString cubeName = "default";
-
   QVector<QString> args = {"fromlist=" + cubeListFile,
-                           "cubename=" + cubeName,
                            "outputprefix=" + prefix.path() + "/CAS-MCO"};
   UserInterface options(APP_XML, args);
 
@@ -236,7 +231,7 @@ TEST(TgoCassisstitch, TgoCassisstitchSingleframeTest) {
     FAIL() << "Unable to run tgocassisstitch with cube list: " << e.what() << std::endl;
   }
 
-  Cube cube(prefix.path() + "/CAS-MCO-default.cub");
+  Cube cube(prefix.path() + "/CAS-MCO-2016-11-22T16:16:10.833.cub");
   Pvl *isisLabel = cube.label();
 
   // Dimensions Group

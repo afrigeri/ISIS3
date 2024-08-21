@@ -122,7 +122,6 @@ Group = TargetName
   InputDefault   = "N/A"
   OutputPosition = (Object, IsisCube, Group, Instrument)
   Translation    = ("VESTA", "4 VESTA")
-  Translation    = ("CERES", "1 CERES")
   Translation    = (*, *)
 End_Group
 

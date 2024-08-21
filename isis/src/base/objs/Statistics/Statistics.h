@@ -13,14 +13,15 @@ find files of those names at the top level of this repository. **/
 #include "Constants.h"
 #include "PvlGroup.h"
 #include "SpecialPixel.h"
+#include "XmlStackedHandler.h"
 
 class QDataStream;
 class QUuid;
 class QXmlStreamWriter;
-class QXmlStreamReader;
 
 namespace Isis {
   class Project;// ??? does xml stuff need project???
+  class XmlStackedHandlerReader;
   /**
    * @brief This class is used to accumulate statistics on double arrays.
    *
@@ -94,8 +95,7 @@ namespace Isis {
     Q_OBJECT
     public:
       Statistics(QObject *parent = 0);
-      Statistics(QXmlStreamReader *xmlReader, QObject *parent = 0);
-      void readStatistics(QXmlStreamReader *xmlReader);
+      Statistics(Project *project, XmlStackedHandlerReader *xmlReader, QObject *parent = 0);
       Statistics(const PvlGroup &inStats, QObject *parent = 0);
       // TODO: does xml read/write stuff need Project input???
       Statistics(const Statistics &other);
@@ -157,7 +157,34 @@ namespace Isis {
     private:
 
       void fromPvl(const PvlGroup &inStats);
-      
+
+      /**
+       *
+       * @author 2014-07-28 Jeannie Backer
+       *
+       * @internal
+       */
+      class XmlHandler : public XmlStackedHandler {
+        public:
+          XmlHandler(Statistics *statistics, Project *project);
+          // TODO: does xml stuff need project???
+          ~XmlHandler();
+
+          virtual bool startElement(const QString &namespaceURI, const QString &localName,
+                                    const QString &qName, const QXmlAttributes &atts);
+          virtual bool characters(const QString &ch);
+          virtual bool endElement(const QString &namespaceURI, const QString &localName,
+                                    const QString &qName);
+
+        private:
+          Q_DISABLE_COPY(XmlHandler);
+
+          Statistics *m_xmlHandlerStatistics;
+          Project *m_xmlHandlerProject;
+          // TODO: does xml stuff need project???
+          QString m_xmlHandlerCharacters;
+      };
+
 //      QUuid *m_id; /**< A unique ID for this object (useful for others to reference
 //                        this object when saving to disk).*/
       double m_sum;              //!< The sum accumulator, i.e. the sum of added data values.
@@ -187,3 +214,4 @@ namespace Isis {
 } // end namespace isis
 
 #endif
+

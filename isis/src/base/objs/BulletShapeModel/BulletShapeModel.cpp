@@ -442,7 +442,7 @@ namespace Isis {
     }
 
     btVector3 normal = m_intercept.normal();
-    setLocalNormal(normal[0], normal[1], normal[2]);
+    setNormal(normal[0], normal[1], normal[2]);
   }
 
 
@@ -538,8 +538,7 @@ namespace Isis {
    */
   void BulletShapeModel::calculateSurfaceNormal() {
     // ShapeModel (parent class) throws error if no intersection
-    QVector<double> norm = ellipsoidNormal();
-    setNormal(std::vector<double>(norm.begin(), norm.end()));// this takes care of setHasNormal(true);
+    setNormal(ellipsoidNormal().toStdVector());// this takes care of setHasNormal(true);
   }
 
 
@@ -582,8 +581,7 @@ namespace Isis {
     // Get the body radii and compute the true normal of the ellipsoid
     QVector<double> norm(3);
     // need a case for target == NULL
-    std::vector<Distance> stdRadii = targetRadii();
-    QVector<Distance> radii = QVector<Distance>(stdRadii.begin(), stdRadii.end());
+    QVector<Distance> radii = QVector<Distance>::fromStdVector(targetRadii());
     NaifStatus::CheckErrors();
     surfnm_c(radii[0].kilometers(), radii[1].kilometers(), radii[2].kilometers(),
              pB, &norm[0]);
@@ -721,11 +719,11 @@ namespace Isis {
       ShapeModel::setSurfacePoint( makeSurfacePoint(m_intercept.point()) ); // sets ShapeModel::m_hasIntersection=t, ShapeModel::m_hasNormal=f
 
       btVector3 normal = m_intercept.normal();
-      setLocalNormal(normal[0], normal[1], normal[2]);
+      setNormal(normal[0], normal[1], normal[2]);
     }
     else {
       ShapeModel::clearSurfacePoint();
-      setHasLocalNormal(false);
+      setHasNormal(false);
     }
 
     return;

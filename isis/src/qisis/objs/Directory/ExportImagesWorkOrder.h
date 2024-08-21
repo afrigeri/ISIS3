@@ -58,7 +58,7 @@ namespace Isis {
        *
        * @internal
        */
-      class ProjectImageExportFunctor : public std::function<void *(Image * const &)> {
+      class ProjectImageExportFunctor : public std::unary_function<Image * const &, void *> {
         public:
           ProjectImageExportFunctor(QString destination);
           ProjectImageExportFunctor(const ProjectImageExportFunctor &other);

@@ -305,7 +305,7 @@ namespace Isis {
         }
 
         inline QDateTime created() const {
-          return ( info().birthTime() );
+          return ( info().created() );
         }
 
         inline QDateTime modified() const {

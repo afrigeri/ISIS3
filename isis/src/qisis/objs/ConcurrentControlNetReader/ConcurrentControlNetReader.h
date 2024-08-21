@@ -8,7 +8,6 @@ For more details about the LICENSE terms and the AUTHORS, you will
 find files of those names at the top level of this repository. **/
 
 /* SPDX-License-Identifier: CC0-1.0 */
-#include <functional>
 
 #include <QObject>
 #include <QPair>
@@ -81,8 +80,8 @@ namespace Isis {
        *
        * @internal
        */
-      class FileNameToControlFunctor : public std::function<
-          Control *(const QPair<FileName, Progress *> &)> {
+      class FileNameToControlFunctor : public std::unary_function<
+          const QPair<FileName, Progress *> &, Control *> {
         public:
           FileNameToControlFunctor(QThread *);
           FileNameToControlFunctor(const FileNameToControlFunctor &);

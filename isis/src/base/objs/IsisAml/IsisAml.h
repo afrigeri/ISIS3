@@ -15,8 +15,6 @@ find files of those names at the top level of this repository. **/
 
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 
-#include <nlohmann/json.hpp>
-
 #include "IsisXMLApplication.h"
 #include "IsisAmlData.h"
 #include "Pvl.h"
@@ -212,8 +210,6 @@ class IsisAml : protected IsisAmlData {
 
     //! Given the group name get its index in group array
     int GroupIndex(const QString & grpName) const;
-  
-    nlohmann::json GetParams();
 
     int NumParams(const int &) const;
 

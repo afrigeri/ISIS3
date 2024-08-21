@@ -42,14 +42,7 @@ namespace Isis{
     else
         campt.SetCSVOutput(true);
 
-    QString inputCubePath = "";
-    try {
-      inputCubePath = ui.GetCubeName("FROM");
-    }
-    catch (IException &e) {
-      inputCubePath = cube->fileName();
-    }
-    campt.SetCube(inputCubePath);
+    campt.SetCube(cube->fileName());
 
     // Grab the provided points (coordinates)
     QList< QPair<double, double> > points = getPoints(ui, ui.WasEntered("COORDLIST"));
@@ -117,7 +110,6 @@ namespace Isis{
     QList<PvlGroup*> cameraPoints;
     bool usePointList = ui.WasEntered("COORDLIST");
     bool allowOutside = ui.GetBoolean("ALLOWOUTSIDE");
-    bool allowError = ui.GetBoolean("ALLOWERROR");
     QString type;
     if (ui.WasEntered("COORDLIST")) {
       type = ui.GetString("COORDTYPE");
@@ -132,12 +124,7 @@ namespace Isis{
 
       QPair<double, double> pt = points[i];
       if (type == "GROUND") {
-        if (allowError) {
-          camPoint = campt.SetGround(pt.first, pt.second, allowOutside, allowError);
-        }
-        else {
-          camPoint = campt.SetGround(pt.first, pt.second, allowOutside, usePointList);
-        }      
+        camPoint = campt.SetGround(pt.first, pt.second, allowOutside, usePointList);
       }
       else {
         if (usePointList) {
@@ -145,17 +132,17 @@ namespace Isis{
         }
         else {
           if (ui.WasEntered("SAMPLE") && ui.WasEntered("LINE")) {
-            camPoint = campt.SetImage(pt.first, pt.second, allowOutside, allowError);
+            camPoint = campt.SetImage(pt.first, pt.second, allowOutside);
           }
           else {
             if (ui.WasEntered("SAMPLE")) {
-              camPoint = campt.SetSample(pt.first, allowOutside, allowError);
+              camPoint = campt.SetSample(pt.first, allowOutside);
             }
             else if (ui.WasEntered("LINE")) {
-              camPoint = campt.SetLine(pt.second, allowOutside, allowError);
+              camPoint = campt.SetLine(pt.second, allowOutside);
             }
             else {
-              camPoint = campt.SetCenter(allowOutside, allowError);
+              camPoint = campt.SetCenter(allowOutside);
             }
           }
         }

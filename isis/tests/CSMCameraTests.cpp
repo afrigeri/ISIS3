@@ -474,12 +474,9 @@ TEST_F(CSMCameraFixture, CameraState) {
 
 
 TEST_F(CSMCameraFixture, SetTime) {
-  std::string failMsg = "Expected an IException with message \""
-                        " Setting the image time is not supported for CSM camera models\"";
   try
   {
     testCam->setTime(iTime("2000-01-01T11:58:55.816"));
-    FAIL() << failMsg;
   }
   catch(Isis::IException &e)
   {
@@ -488,19 +485,17 @@ TEST_F(CSMCameraFixture, SetTime) {
   }
   catch(...)
   {
-      FAIL() << failMsg;
+      FAIL() << "Expected an IException with message \""
+      " Setting the image time is not supported for CSM camera models\"";
   }
 }
 
 
 TEST_F(CSMCameraFixture, SubSolarPoint) {
-  std::string failMsg = "Expected an IException with message \""
-                        " Sub solar point is not supported for CSM camera models\"";
   try
   {
     double lat, lon;
     testCam->subSolarPoint(lat ,lon);
-    FAIL() << failMsg;
   }
   catch(Isis::IException &e)
   {
@@ -509,18 +504,16 @@ TEST_F(CSMCameraFixture, SubSolarPoint) {
   }
   catch(...)
   {
-      FAIL() << failMsg;
+      FAIL() << "Expected an IException with message \""
+      " Sub solar point is not supported for CSM camera models\"";
   }
 }
 
 
 TEST_F(CSMCameraFixture, PixelIfovOffsets) {
-  std::string failMsg = "Expected an IException with message \""
-                        " Pixel Field of View is not supported for CSM camera models\"";
   try
   {
     testCam->PixelIfovOffsets();
-    FAIL() << failMsg;
   }
   catch(Isis::IException &e)
   {
@@ -529,19 +522,17 @@ TEST_F(CSMCameraFixture, PixelIfovOffsets) {
   }
   catch(...)
   {
-    FAIL() << failMsg;
+      FAIL() << "Expected an IException with message \""
+      " Pixel Field of View is not supported for CSM camera models\"";
   }
 }
 
 
 TEST_F(CSMCameraFixture, SunPosition) {
-  std::string failMsg = "Expected an IException with message \""
-                        " Sun position is not supported for CSM camera models\"";
   try
   {
     double position[3];
     testCam->sunPosition(position);
-    FAIL() << failMsg;
   }
   catch(Isis::IException &e)
   {
@@ -550,13 +541,13 @@ TEST_F(CSMCameraFixture, SunPosition) {
   }
   catch(...)
   {
-    FAIL() << failMsg;
+      FAIL() << "Expected an IException with message \""
+      " Sun position is not supported for CSM camera models\"";
   }
 
   try
   {
     testCam->sunPosition();
-    FAIL() << failMsg;
   }
   catch(Isis::IException &e)
   {
@@ -565,18 +556,16 @@ TEST_F(CSMCameraFixture, SunPosition) {
   }
   catch(...)
   {
-    FAIL() << failMsg;
+      FAIL() << "Expected an IException with message \""
+      " Sun position is not supported for CSM camera models\"";
   }
 }
 
 
 TEST_F(CSMCameraFixture, InstrumentPosition) {
-  std::string failMsg = "Expected an IException with message \""
-                        " Instrument position is not supported for CSM camera models\"";
   try
   {
     testCam->instrumentPosition();
-    FAIL() << failMsg;
   }
   catch(Isis::IException &e)
   {
@@ -585,7 +574,8 @@ TEST_F(CSMCameraFixture, InstrumentPosition) {
   }
   catch(...)
   {
-    FAIL() << failMsg;
+      FAIL() << "Expected an IException with message \""
+      " Instrument position is not supported for CSM camera models\"";
   }
 }
 
@@ -597,7 +587,7 @@ TEST_F(CSMCameraFixture, BodyRotation) {
   }
   catch(Isis::IException &e)
   {
-    EXPECT_TRUE(e.toString().toLatin1().contains("Body orientation is not supported "
+    EXPECT_TRUE(e.toString().toLatin1().contains("Target body orientation is not supported "
         "for CSM camera models")) << e.toString().toStdString();
   }
   catch(...)
@@ -663,73 +653,36 @@ TEST_F(CSMCameraFixture, SolarDistance) {
 
 
 TEST_F(CSMCameraFixture, RightAscension) {
-  // Define some things to match/return
-  csm::Ellipsoid wgs84;
-  csm::EcefLocus imageLocus(wgs84.getSemiMajorRadius() + 50000, 0, 0, -1, 0, 0);
-
-  // Setup expected calls/returns
-  EXPECT_CALL(mockModel, imageToRemoteImagingLocus(::testing::_, ::testing::_, ::testing::_, ::testing::_))
-      .Times(1)
-      .WillRepeatedly(::testing::Return(imageLocus));
-
   try
   {
-    double rightAscension = testCam->RightAscension();
-    EXPECT_FLOAT_EQ(rightAscension, 180.0);
+    testCam->RightAscension();
   }
-  catch (IException &e)
+  catch(Isis::IException &e)
   {
-    FAIL() << "Failed test with [" << e.what() << "]";
+    EXPECT_TRUE(e.toString().toLatin1().contains("Right Ascension is not supported "
+        "for CSM camera models")) << e.toString().toStdString();
+  }
+  catch(...)
+  {
+      FAIL() << "Expected an IException with message \""
+      " Right Ascension is not supported for CSM camera models\"";
   }
 }
 
 
 TEST_F(CSMCameraFixture, Declination) {
-  // Define some things to match/return
-  csm::Ellipsoid wgs84;
-  csm::EcefLocus imageLocus(wgs84.getSemiMajorRadius() + 50000, 0, 0, -1, 0, 0);
-
-  // Setup expected calls/returns
-  EXPECT_CALL(mockModel, imageToRemoteImagingLocus(::testing::_, ::testing::_, ::testing::_, ::testing::_))
-      .Times(1)
-      .WillRepeatedly(::testing::Return(imageLocus));
-
   try
   {
-    double declination = testCam->Declination();
-    EXPECT_FLOAT_EQ(declination, 0.0);
+    testCam->Declination();
   }
-  catch (IException &e)
+  catch(Isis::IException &e)
   {
-    FAIL() << "Failed test with [" << e.what() << "]";
+    EXPECT_TRUE(e.toString().toLatin1().contains("Declination is not supported "
+        "for CSM camera models")) << e.toString().toStdString();
   }
-}
-
-TEST_F(CSMCameraFixture, SetRightAscensionDeclination) {
-  // Define some things to match/return
-  csm::Ellipsoid wgs84;
-  csm::ImageCoord imagePt(4.5, 4.5);
-  csm::EcefCoord groundPt(1, 0, 0);
-  csm::EcefLocus imageLocus(wgs84.getSemiMajorRadius() + 50000, 0, 0, -1, 0, 0);
-
-  // Setup expected calls/returns
-  EXPECT_CALL(mockModel, groundToImage(MatchEcefCoord(groundPt), ::testing::_, ::testing::_, ::testing::_))
-      .Times(1)
-      .WillRepeatedly(::testing::Return(imagePt));
-  EXPECT_CALL(mockModel, imageToRemoteImagingLocus(MatchImageCoord(imagePt), ::testing::_, ::testing::_, ::testing::_))
-      .Times(1)
-      .WillRepeatedly(::testing::Return(imageLocus));
-  EXPECT_CALL(mockModel, getImageTime)
-      .Times(1)
-      .WillRepeatedly(::testing::Return(10.0));
-  try
+  catch(...)
   {
-    testCam->SetRightAscensionDeclination(0, 0);
-    EXPECT_FLOAT_EQ(testCam->Sample(), 5);
-    EXPECT_FLOAT_EQ(testCam->Line(), 5);
-  }
-  catch (IException &e)
-  {
-    FAIL() << "Failed test with [" << e.what() << "]";
+      FAIL() << "Expected an IException with message \""
+      " Declination is not supported for CSM camera models\"";
   }
 }

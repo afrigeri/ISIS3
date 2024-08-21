@@ -64,7 +64,7 @@ def activate_text(shell: dict, env_vars: dict, cat=False) -> str:
         lines.append(shell["activate_extra"])
 
     if cat:
-        lines.append("cat $ISISROOT/isis_version.txt")
+        lines.append("cat $ISISROOT/version")
 
     return "\n".join(lines)
 

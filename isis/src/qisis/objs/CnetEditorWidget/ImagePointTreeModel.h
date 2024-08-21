@@ -66,7 +66,8 @@ namespace Isis {
        *
        * @internal
        */
-      class CreateRootItemFunctor : public std::function <ImageParentItem *(const QString)> {
+      class CreateRootItemFunctor : public std::unary_function <
+          const QString, ImageParentItem * > {
         public:
           CreateRootItemFunctor(AbstractTreeModel *tm, ControlNet *net, QThread *tt);
           CreateRootItemFunctor(const CreateRootItemFunctor &);

@@ -459,20 +459,8 @@ namespace Isis {
 
     if (groundMap) {
       if ( groundMap->SetImage(samp, line) ) {
-        if (activeViewport->camera() != NULL) {
-          if (activeViewport->camera()->target()->isSky()) {
-            p_lat = activeViewport->camera()->Declination();
-            p_lon = activeViewport->camera()->RightAscension();
-          }
-          else {
-            p_lat = groundMap->UniversalLatitude();
-            p_lon = groundMap->UniversalLongitude();
-          }
-        }
-        else {
-          p_lat = groundMap->UniversalLatitude();
-          p_lon = groundMap->UniversalLongitude();
-        }
+        p_lat = groundMap->UniversalLatitude();
+        p_lon = groundMap->UniversalLongitude();
       }
     }
     else {
@@ -523,7 +511,7 @@ namespace Isis {
         pen.setWidth(3);
         pen.setStyle(Qt::SolidLine);
         painter->setPen(pen);
-        painter->drawRoundedRect(x - 2, y - 2, 4, 4, 1, 1, Qt::RelativeSize);
+        painter->drawRoundRect(x - 2, y - 2, 4, 4);
       }
     }
   }
@@ -631,14 +619,8 @@ namespace Isis {
    */
   Distance FindTool::distancePerPixel(MdiCubeViewport *viewport,
                                       double lat, double lon) {
-    // UniversalGroundMaps default to camera priority, so create a new one so that we can use projection if it exists.
-    std::unique_ptr<UniversalGroundMap> groundMap(new UniversalGroundMap(*(viewport->cube()), UniversalGroundMap::ProjectionFirst));
+    UniversalGroundMap *groundMap = viewport->universalGroundMap();
     Distance viewportResolution;
-    if (groundMap->Camera() != NULL){
-      if (groundMap->Camera()->target()->isSky()) {
-        return Distance(groundMap->Camera()->RaDecResolution(), Distance::Units::Meters);
-      }
-    }
 
     try {
       if ( groundMap && !IsSpecial(lat) && !IsSpecial(lon) &&

@@ -74,7 +74,9 @@ namespace Isis {
 
     //  Functor predicate for sorting LidarControlPoints
     struct LidarControlPointLessThanFunctor :
-      public std::function<bool(QSharedPointer<LidarControlPoint>, QSharedPointer<LidarControlPoint>)> {
+      public std::binary_function<QSharedPointer<LidarControlPoint>,
+                                                      QSharedPointer<LidarControlPoint>,
+                                                      bool> {
       bool operator() ( QSharedPointer<LidarControlPoint> lcp1,
                                     QSharedPointer<LidarControlPoint> lcp2)
           {

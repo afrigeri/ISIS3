@@ -19,7 +19,6 @@ find files of those names at the top level of this repository. **/
 #include <QString>
 #include <QStringList>
 #include <QVector>
-#include <QRandomGenerator>
 
 #include "ControlMeasure.h"
 #include "ControlMeasureLogData.h"
@@ -169,7 +168,7 @@ cout << "  " << "Island Count = " << islands.size() << endl;
 
 
 int main() {
-  QRandomGenerator(42);
+  qsrand(42);
 
   Preference::Preferences(true);
   cout << "UnitTest for ControlNet ...." << endl << endl;

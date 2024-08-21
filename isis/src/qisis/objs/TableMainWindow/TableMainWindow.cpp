@@ -244,9 +244,9 @@ namespace Isis {
       }
 
       p_table->setColumnWidth(destinationColumn,
-          QFontMetrics(header->font()).horizontalAdvance(header->text()) + 20);
+          QFontMetrics(header->font()).width(header->text()) + 20);
           // Removed: rounding and int?
-          // qRound(QFontMetrics(header->font()).horizontalAdvance(header->text()) + 20));
+          // qRound(QFontMetrics(header->font()).width(header->text()) + 20));
     }
 
     int endCol = p_table->columnCount() - 1;
@@ -424,7 +424,7 @@ namespace Isis {
       }
     }
 
-    std::sort(selectedRows.begin(), selectedRows.end());
+    qSort(selectedRows.begin(), selectedRows.end());
     for(int d = selectedRows.size(); d > 0; d--) {
       p_table->removeRow(selectedRows[d-1]);
     }
@@ -527,7 +527,7 @@ namespace Isis {
       }
     }
     //Add the headers to the file
-    t << line << Qt::endl;
+    t << line << endl;
 
     //Add each row to the file
     for(int i = 0; i < p_table->rowCount(); i++) {
@@ -551,8 +551,8 @@ namespace Isis {
         }
       }
       //If the line is not empty, add it to the file
-      if (line.split(",", Qt::SkipEmptyParts).count() != 0)
-        t << line << Qt::endl;
+      if (line.split(",", QString::SkipEmptyParts).count() != 0)
+        t << line << endl;
     }
     p_currentFile.close();
     this->setWindowTitle(p_title + " : " + p_currentFile.fileName());

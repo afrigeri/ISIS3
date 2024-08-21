@@ -350,8 +350,6 @@ namespace Isis {
 
     menuBar()->addMenu("&Tables");
 
-    menuBar()->addMenu("&Coordinate Display");
-
     helpMenu = menuBar()->addMenu("&Help");
   }
 
@@ -591,7 +589,7 @@ namespace Isis {
 
           QTextStream ts(&newCubeListFile);
           foreach (QString cubeFileName, cubeFileNames) {
-            ts << cubeFileName << Qt::endl;
+            ts << cubeFileName << endl;
           }
 
           newCubeListFile.close();

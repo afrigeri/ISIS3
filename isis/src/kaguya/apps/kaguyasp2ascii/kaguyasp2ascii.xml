@@ -80,10 +80,10 @@
           Input Kaguya SP file
         </brief>
         <description>
-          This is the input Kaguya SP file.  For an attached label, use the .spc file, or for a detached label, use the .lbl file.
+          This is the input Kaguya SP file
         </description>
         <filter>
-          *.lbl *.spc
+          *.spc
         </filter>
       </parameter>
       <parameter name="TO">

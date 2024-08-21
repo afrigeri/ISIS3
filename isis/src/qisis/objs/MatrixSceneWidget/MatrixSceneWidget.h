@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "XmlStackedHandler.h"
+
 template <typename A> class QList;
 class QGraphicsPolygonItem;
 class QGraphicsRectItem;
@@ -68,6 +70,7 @@ namespace Isis {
       QProgressBar *getProgress();
       PvlObject toPvl() const;
       void fromPvl(const PvlObject &);
+//       void load(XmlStackedHandlerReader *xmlReader);
 
       QRectF elementsBoundingRect() const;
       Directory *directory() const;

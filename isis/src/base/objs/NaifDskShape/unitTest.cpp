@@ -157,27 +157,24 @@ int main(int argc, char *argv[]) {
 
     qDebug() << "Try to calculate norms using valid shape model...";
     shapeModelFromPvlElevation.setLocalNormalFromIntercept();
-    qDebug() << "Has intercept normal?                " << shapeModelFromPvlElevation.hasLocalNormal();
-    std::vector<double> normal = shapeModelFromPvlElevation.localNormal();
+    qDebug() << "Has intercept normal?                " << shapeModelFromPvlElevation.hasNormal();
     qDebug() << "Normal set from Intercept:           "
-             << QVector<double>(normal.begin(), normal.end());
+             << QVector<double>::fromStdVector(shapeModelFromPvlElevation.normal());
     // no need to call calculateSurfaceNormal() or ellipsoidNormal()
     // directly. these methods are called by calculateDefaultNormal()
     shapeModelFromPvlElevation.calculateDefaultNormal(); 
     qDebug() << "Has default normal?                  " << shapeModelFromPvlElevation.hasNormal();
-    normal = shapeModelFromPvlElevation.normal();
     qDebug() << "Default normal:                      "
-             << QVector<double>(normal.begin(), normal.end());
+             << QVector<double>::fromStdVector(shapeModelFromPvlElevation.normal());
 
     QVector <double *> cornerNeighborPoints;
     double point[3];
     point[0] = 1.0;    point[1] = 0.0;    point[2] = 0.0;
     cornerNeighborPoints.push_back(point);
     shapeModelFromPvlElevation.calculateLocalNormal(cornerNeighborPoints); 
-    qDebug() << "Has local normal?                    " << shapeModelFromPvlElevation.hasLocalNormal();
-    normal = shapeModelFromPvlElevation.localNormal();
+    qDebug() << "Has local normal?                    " << shapeModelFromPvlElevation.hasNormal();
     qDebug() << "Local normal from neighbor points:   "
-             << QVector<double>(normal.begin(), normal.end());
+             << QVector<double>::fromStdVector(shapeModelFromPvlElevation.normal());
     qDebug() << "";
 
     qDebug() << "================================= Error Throws ==================================";

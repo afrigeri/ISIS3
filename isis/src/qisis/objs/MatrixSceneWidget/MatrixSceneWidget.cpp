@@ -31,6 +31,7 @@
 #include "TextFile.h"
 #include "Target.h"
 #include "ToolPad.h"
+#include "XmlStackedHandlerReader.h"
 
 #include <boost/numeric/ublas/fwd.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -243,6 +244,12 @@ namespace Isis {
   QProgressBar *MatrixSceneWidget::getProgress() {
     return m_progress;
   }
+
+
+
+//   void MatrixSceneWidget::load(XmlStackedHandlerReader *xmlReader) {
+//     xmlReader->pushContentHandler( new XmlHandler(this) );
+//   }
 
 
   /**

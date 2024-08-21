@@ -321,7 +321,7 @@ namespace Isis {
        */
       template <typename T>
       class ProcessCubeInPlaceFunctor :
-          public std::function<void*(int)> {
+          public std::unary_function<const int &, void *> {
         public:
           /**
            * Construct a ProcessCubeInPlaceFunctor. This doesn't take ownership
@@ -445,7 +445,7 @@ namespace Isis {
        */
       template <typename T>
       class ProcessCubeFunctor :
-          public std::function<void *(const int &)> {
+          public std::unary_function<const int &, void *> {
         public:
           /**
            * Construct a ProcessCubeFunctor. This doesn't take ownership
@@ -572,7 +572,7 @@ namespace Isis {
        */
       template <typename T>
       class ProcessCubesFunctor :
-          public std::function<void *(const int &)> {
+          public std::unary_function<const int &, void *> {
         public:
           /**
            * Construct a ProcessCubesFunctor. This doesn't take ownership
@@ -748,17 +748,12 @@ namespace Isis {
        *
        * @internal
        */
-      class ProcessIterator {
+      class ProcessIterator : public std::iterator<
+          std::forward_iterator_tag, int> {
         public:
           ProcessIterator(int position);
           ProcessIterator(const ProcessIterator &other);
           virtual ~ProcessIterator();
-
-          using value_type = int;
-          using iterator_category = std::forward_iterator_tag;
-          using difference_type = std::ptrdiff_t;
-          using pointer = int*;
-          using reference = int&;
 
           ProcessIterator &operator++();
 
